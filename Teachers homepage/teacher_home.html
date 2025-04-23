@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyPlanner - Teacher Dashboard</title>
+    <link rel="stylesheet" href="tHome.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="wrapper">
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="logo">StudyPlanner</div>
+        <ul class="nav-links">
+            <li><a href="#" class="active"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="#"><i class="fas fa-info-circle"></i> About Us</a></li>
+            <li><a href="../Create/create_scheduler.html"><i class="fas fa-plus-circle"></i> Create</a></li>
+            <li><a href=#><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Welcome Section  -->
+        <div class="welcome-section">
+            <h1>Welcome back, <span id="teacher-name">Teacher</span>!</h1>
+            
+            <p class="date" id="current-date"></p>
+        </div>
+
+        <!-- Student Search Section -->
+        <div class="search-section">
+            <div class="search-container">
+                <input type="text" id="student-id" placeholder="Enter Student ID">
+                <button id="search-student"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+
+        <!-- Student Performance Section -->
+        <div class="performance-section" id="performance-section" style="display: none;">
+            <div class="student-header">
+                <h2>Student Performance Analysis</h2>
+                <h3 id="student-name-display"></h3>
+            </div>
+
+            <div class="performance-grid">
+                <div class="task-statistics">
+                    <h2>Task Statistics</h2>
+                    <div class="stats-list">
+                        <div class="stat-item">
+                            <span class="label">Tasks Completed</span>
+                            <span class="value" id="tasks-completed">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="label">Tasks Left</span>
+                            <span class="value" id="tasks-left">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="label">Overall Study Hours</span>
+                            <span class="value" id="study-hours">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="remarks-section">
+                    <h2>Teacher Remarks</h2>
+                    <div class="remarks-container">
+                        <textarea id="teacher-remarks" placeholder="Enter your remarks here..."></textarea>
+                        <button id="save-remarks">
+                            <i class="fas fa-save"></i> Save Remarks
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <p><i class="fas fa-envelope"></i> Email: support@studyplanner.com</p>
+                <p><i class="fas fa-phone"></i> Phone: 9207151600</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#"><i class="fas fa-comment"></i> Feedback</a></li>
+                    <li><a href="#"><i class="fas fa-file-contract"></i> Terms & Conditions</a></li>
+                    <li><a href="#"><i class="fas fa-info-circle"></i> About Us</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+        <!--<div class="footer-bottom">
+            <p>&copy; 2024 StudyPlanner. All rights reserved.</p>
+        </div>!-->
+    </footer>
+
+    <script src="teacher_script.js"></script>
+</body>
+</html> 

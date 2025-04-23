@@ -44,7 +44,7 @@ document.getElementById("login-form").addEventListener("submit", function (event
 
         // Redirect user based on role
         setTimeout(() => {
-            window.location.href = activeRole === "student" ? "../Home page/student_home.html" : "../Home page/teacher_home.html";
+            window.location.href = activeRole === "student" ? "../Homepage/student_home.html" : "../Home page/teacher_home.html";
         }, 100);
     } else {
         alert("Invalid username, password, or role selection.");
