@@ -1,0 +1,312 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Lato', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+body {
+    background-color: #f4f6f9;
+    color: #2d3436;
+}
+/* Global Styles */
+html, body {
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f4f6f9;
+    color: #1e293b;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* Navigation Bar */
+.navbar {
+    background-color: #5E81AC;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    /*box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 12px;*/
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color:  #2E3440 ;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #2d3436;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.3s ease;
+}
+
+.nav-links a:hover, .nav-links a.active {
+    color: #A3BE8C;
+}
+/* About Us Page Styles */
+.about-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+}
+
+.about-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 50px;
+}
+
+.about-header h1 {
+    font-size: 2.5rem;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+  
+}
+
+.about-header .subtitle {
+    font-size: 1.2rem;
+    color: #7f8c8d;
+}
+
+/* Section Styles */
+.about-section {
+    margin-bottom: 4rem;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+}
+
+.about-section h2 {
+    color: #2c3e50;
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.about-section h2 i {
+    color: #3498db;
+}
+
+.section-content {
+    line-height: 1.6;
+}
+
+/* Problem & Solution Section */
+#problem-solution .section-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.problem, .solution {
+    padding: 1.5rem;
+    background: #d4dde6;
+    border-radius: 8px;
+}
+
+.problem h3, .solution h3 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.problem ul, .solution ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.problem li, .solution li {
+    margin-bottom: 0.5rem;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.problem li:before {
+    content: "⚠️";
+    position: absolute;
+    left: 0;
+}
+
+.solution li:before {
+    content: "✓";
+    color: #27ae60;
+    position: absolute;
+    left: 0;
+}
+
+/* Motivation Section */
+#motivation .section-content {
+    text-align: center;
+}
+
+#motivation ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 2rem 0;
+}
+
+#motivation li {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: #d4dde6;
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+}
+
+#motivation li:hover {
+    transform: translateY(-5px);
+}
+
+/* Achievements Section */
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.achievement-card {
+    text-align: center;
+    padding: 2rem;
+    background: #d4dde6;
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+}
+
+.achievement-card:hover {
+    transform: translateY(-5px);
+}
+
+.achievement-card i {
+    font-size: 2.5rem;
+    color: #3498db;
+    margin-bottom: 1rem;
+}
+
+.achievement-card h3 {
+    font-size: 2rem;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.achievement-card p {
+    color: #7f8c8d;
+}
+
+/* Testimonials */
+.testimonials {
+    margin-top: 3rem;
+}
+
+.testimonials h3 {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.testimonial-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.testimonial-card {
+    background: #d4dde6;
+    padding: 2rem;
+    border-radius: 8px;
+    position: relative;
+}
+
+.testimonial-card p {
+    font-style: italic;
+    margin-bottom: 1rem;
+}
+
+.testimonial-card cite {
+    color: #7f8c8d;
+    font-style: normal;
+}
+
+/* Footer */
+.footer {
+    background: #1e293b;
+    color: white;
+    padding: 2rem 1rem;
+    margin-top: auto;
+}
+.footer-content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: 2rem;
+}
+.footer-section h3 {
+    margin-bottom: 1rem;
+}
+.footer-section p, 
+.footer-section a {
+    color: #cbd5e1;
+    font-size: 0.95rem;
+    text-decoration: none;
+}
+.footer-section a:hover {
+    text-decoration: underline;
+}
+.social-links a {
+    margin-right: 0.75rem;
+    font-size: 1.25rem;
+}
+
+
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .about-container {
+        padding: 0 1rem;
+    }
+
+    #problem-solution .section-content {
+        grid-template-columns: 1fr;
+    }
+
+    .achievements-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .testimonial-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .achievements-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .about-header h1 {
+        font-size: 2rem;
+    }
+
+    .about-section {
+        padding: 1.5rem;
+    }
+} 
