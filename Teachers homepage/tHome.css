@@ -18,12 +18,17 @@ html, body {
 .wrapper {
     flex: 1;
     padding-bottom: 2rem;
+    background-image:url(../pexels-brando-ltd-120530945-9869064.png);
+    background-size: cover;
+    
 }
+
+
 
 /* Navbar */
 .navbar {
-    background: #5E81AC;
-    color: #fff;
+    color: #2c3e50;
+    
     padding: 1rem 2rem;
     display: flex;
     justify-content: space-between;
@@ -40,7 +45,7 @@ html, body {
     gap: 1.5rem;
 }
 .nav-links a {
-    color: white;
+    color: #2c3e50;
     text-decoration: none;
     font-size: 1rem;
     transition: 0.3s;
@@ -48,6 +53,8 @@ html, body {
 .nav-links a:hover,
 .nav-links .active {
     text-decoration: underline;
+    color: green;
+
 }
 
 /* Container */
@@ -172,13 +179,14 @@ html, body {
 #save-remarks:hover {
     background-color: #059669;
 }
-
 /* Footer */
 .footer {
     background: #1e293b;
-    color: white;
+    color: black;
     padding: 2rem 1rem;
     margin-top: auto;
+    background-color: rgba(255, 255, 255, 0.162); 
+    backdrop-filter: blur(6px); 
 }
 .footer-content {
     display: flex;
@@ -191,7 +199,7 @@ html, body {
 }
 .footer-section p, 
 .footer-section a {
-    color: #cbd5e1;
+    color: #0c0d0d;
     font-size: 0.95rem;
     text-decoration: none;
 }

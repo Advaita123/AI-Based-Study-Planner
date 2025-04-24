@@ -9,6 +9,7 @@
 body {
     background-color: #f4f6f9;
     color: #2d3436;
+    
 }
 /* Global Styles */
 html, body {
@@ -20,15 +21,21 @@ html, body {
     flex-direction: column;
 }
 
+.wrapper {
+    background-image:url(../pexels-brando-ltd-120530945-9869064.png);
+    background-size: cover;
+    
+}
+
 
 /* Navigation Bar */
 .navbar {
-    background-color: #5E81AC;
+    color: #2c3e50;
     padding: 1rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    position: fixed;
+    
     width: 100%;
     top: 0;
     z-index: 1000;
@@ -38,7 +45,7 @@ html, body {
 .logo {
     font-size: 1.5rem;
     font-weight: bold;
-    color:  #2E3440 ;
+    color: #2c3e50;
 }
 
 .nav-links {
@@ -49,7 +56,7 @@ html, body {
 
 .nav-links a {
     text-decoration: none;
-    color: #2d3436;
+    color: #2c3e50;
     font-weight: 500;
     display: flex;
     align-items: center;
@@ -58,7 +65,7 @@ html, body {
 }
 
 .nav-links a:hover, .nav-links a.active {
-    color: #A3BE8C;
+    color: green;
 }
 /* Main Container */
 .container {
@@ -67,6 +74,7 @@ html, body {
     padding: 0 1rem;
     
 }
+
 
 /* Welcome Section */
 .welcome-section {
@@ -91,6 +99,7 @@ html, body {
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
+    
 }
 
 .stat-card {
@@ -99,6 +108,8 @@ html, body {
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     text-align: center;
+    background-color: rgba(255, 255, 255, 0.315); /* semi-transparent white */
+    backdrop-filter: blur(6px); 
 }
 
 .stat-card i {
@@ -130,6 +141,8 @@ html, body {
     padding: 1.5rem;
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: rgba(255, 255, 255, 0.315); /* semi-transparent white */
+    backdrop-filter: blur(6px); 
 }
 
 .grid-item h2 {
@@ -154,6 +167,8 @@ html, body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background-color: rgba(255, 255, 255, 0.315); /* semi-transparent white */
+    backdrop-filter: blur(6px); 
 }
 
 /* Difficulty Section */
@@ -217,10 +232,12 @@ html, body {
 
 /* Exam Countdown Section */
 .exam-countdown {
-    background-color: #ffffff;
+    
     padding: 1.5rem;
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: rgba(255, 255, 255, 0.315); /* semi-transparent white */
+    backdrop-filter: blur(6px); 
 }
 
 .countdown-container {
@@ -262,9 +279,11 @@ html, body {
 /* Footer */
 .footer {
     background: #1e293b;
-    color: white;
+    color: black;
     padding: 2rem 1rem;
     margin-top: auto;
+    background-color: rgba(255, 255, 255, 0.162); 
+    backdrop-filter: blur(6px); 
 }
 .footer-content {
     display: flex;
@@ -277,7 +296,7 @@ html, body {
 }
 .footer-section p, 
 .footer-section a {
-    color: #cbd5e1;
+    color: #0c0d0d;
     font-size: 0.95rem;
     text-decoration: none;
 }

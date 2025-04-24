@@ -15,20 +15,25 @@ html, body {
     height: 100%;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #f4f6f9;
-    color: #1e293b;
+    color: #2c3e50;
     display: flex;
     flex-direction: column;
+}
+.wrapper {
+    background-image:url(../pexels-brando-ltd-120530945-9869064.png);
+    background-size: cover;
+    
 }
 
 
 /* Navigation Bar */
 .navbar {
-    background-color: #5E81AC;
+    color: #2c3e50;
     padding: 1rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    position: fixed;
+    position:relative;
     width: 100%;
     top: 0;
     z-index: 1000;
@@ -38,7 +43,7 @@ html, body {
 .logo {
     font-size: 1.5rem;
     font-weight: bold;
-    color:  #2E3440 ;
+    color: #2c3e50;
 }
 
 .nav-links {
@@ -49,7 +54,7 @@ html, body {
 
 .nav-links a {
     text-decoration: none;
-    color: #2d3436;
+    color: #2c3e50;
     font-weight: 500;
     display: flex;
     align-items: center;
@@ -58,7 +63,7 @@ html, body {
 }
 
 .nav-links a:hover, .nav-links a.active {
-    color: #A3BE8C;
+    color: green;
 }
 /* About Us Page Styles */
 .about-container {
@@ -70,7 +75,7 @@ html, body {
 .about-header {
     text-align: center;
     margin-bottom: 3rem;
-    padding: 50px;
+    padding: 10px;
 }
 
 .about-header h1 {
@@ -82,7 +87,7 @@ html, body {
 
 .about-header .subtitle {
     font-size: 1.2rem;
-    color: #7f8c8d;
+    color: #0f1010;
 }
 
 /* Section Styles */
@@ -92,6 +97,8 @@ html, body {
     border-radius: 10px;
     box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
     padding: 2rem;
+    background-color: rgba(255, 255, 255, 0.315); /* semi-transparent white */
+    backdrop-filter: blur(6px);
 }
 
 .about-section h2 {
@@ -248,9 +255,11 @@ html, body {
 /* Footer */
 .footer {
     background: #1e293b;
-    color: white;
+    color: black;
     padding: 2rem 1rem;
     margin-top: auto;
+    background-color: rgba(255, 255, 255, 0.162); 
+    backdrop-filter: blur(6px); 
 }
 .footer-content {
     display: flex;
@@ -263,7 +272,7 @@ html, body {
 }
 .footer-section p, 
 .footer-section a {
-    color: #cbd5e1;
+    color: #0c0d0d;
     font-size: 0.95rem;
     text-decoration: none;
 }
@@ -275,38 +284,13 @@ html, body {
     font-size: 1.25rem;
 }
 
-
-
-
-/* Responsive Design */
+/* Media Queries */
 @media (max-width: 768px) {
-    .about-container {
-        padding: 0 1rem;
+    .nav-links {
+        flex-direction: column;
+        gap: 0.75rem;
     }
-
-    #problem-solution .section-content {
-        grid-template-columns: 1fr;
-    }
-
-    .achievements-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .testimonial-grid {
+    .performance-grid {
         grid-template-columns: 1fr;
     }
 }
-
-@media (max-width: 480px) {
-    .achievements-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .about-header h1 {
-        font-size: 2rem;
-    }
-
-    .about-section {
-        padding: 1.5rem;
-    }
-} 
