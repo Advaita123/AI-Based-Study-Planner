@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateDate();
     
     // Set teacher name (in a real application, this would come from login)
-    document.getElementById('teacher-name').textContent = 'Professor Smith';
+    document.getElementById('teacher-name').textContent = 'Professor ';
     
     // Add event listeners
     document.getElementById('search-student').addEventListener('click', handleStudentSearch);
