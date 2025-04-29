@@ -65,7 +65,8 @@ html, body {
 }
 
 .nav-links a:hover, .nav-links a.active {
-    color: green;
+    color:rgb(236, 238, 239);
+
 }
 /* Main Container */
 .container {

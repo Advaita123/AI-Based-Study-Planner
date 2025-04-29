@@ -33,7 +33,7 @@ html, body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    
 }
 .navbar .logo {
     font-size: 1.75rem;
@@ -52,8 +52,8 @@ html, body {
 }
 .nav-links a:hover,
 .nav-links .active {
-    text-decoration: underline;
-    color: green;
+    
+    color:rgb(236, 238, 239);
 
 }
 
@@ -74,7 +74,7 @@ html, body {
     margin-bottom: 0.5rem;
 }
 .date {
-    color: #6b7280;
+    color: #070707;
 }
 
 
@@ -178,7 +178,7 @@ html, body {
     transition: 0.3s;
 }
 #save-remarks:hover {
-    background-color: #059669;
+    background-color: #4C9AFF;;
 }
 /* Footer */
 .footer {

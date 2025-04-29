@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyPlanner - Logout</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="login_styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .logout-container {
+            max-width: 600px;
+            margin: 4rem auto;
+            padding: 2rem;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .logout-icon {
+            font-size: 4rem;
+            color: #3498db;
+            margin-bottom: 1.5rem;
+        }
+
+        .logout-message {
+            margin-bottom: 2rem;
+        }
+
+        .logout-message h1 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .logout-message p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .logout-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+
+        .countdown {
+            font-size: 1.2rem;
+            color: #e74c3c;
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="logo">StudyPlanner</div>
+        <ul class="nav-links">
+            <li><a href="../Homepage/student_home.html"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="../About/about.html"><i class="fas fa-info-circle"></i> About Us</a></li>
+            <li><a href="../Create/create_scheduler.html"><i class="fas fa-plus-circle"></i> Create</a></li>
+            <li><a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+        </ul>
+    </nav>
+
+    <!-- Logout Container -->
+    <div class="logout-container">
+        <div class="logout-icon">
+            <i class="fas fa-sign-out-alt"></i>
+        </div>
+        <div class="logout-message">
+            <!--h1>Logging Out</h1-->
+            <p>You have been successfully logged out.</p>
+            <p>Thank you for using StudyPlanner. We hope to see you again soon!</p>
+        </div>
+        <!--div class="countdown">
+            Redirecting to homepage in <span id="timer">5</span> seconds...
+        </div-->
+        <div class="logout-buttons">
+            <a href="../Homepage/student_home.html" class="btn btn-primary">
+                <i class="fas fa-home"></i> Go to Homepage
+            </a>
+            <a href="login.html" class="btn btn-secondary">
+                <i class="fas fa-sign-in-alt"></i> Login Again
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <p><i class="fas fa-envelope"></i> Email: support@studyplanner.com</p>
+                <p><i class="fas fa-phone"></i> Phone: 9207151652</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <a href="#"><i class="fas fa-comment"></i> Feedback</a><br>
+                    <a href="../About/terms.html"><i class="fas fa-file-contract"></i> Terms & Conditions</a><br>
+                    <a href="../About/about.html"><i class="fas fa-info-circle"></i> About Us</a>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 StudyPlanner. All rights reserved.</p>
+        </div>
+    </footer>
+</div>
+
+<script>
+    // Countdown timer for automatic redirect
+    let timeLeft = 5;
+    const timerElement = document.getElementById('timer');
+    
+    const countdown = setInterval(() => {
+        timeLeft--;
+        timerElement.textContent = timeLeft;
+        
+        if (timeLeft <= 0) {
+            clearInterval(countdown);
+            window.location.href = '../Homepage/student_home.html';
+        }
+    }, 1000);
+</script>
+</body>
+</html> 
