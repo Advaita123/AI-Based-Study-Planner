@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyPlanner - Create Your Schedule</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="create_scheduler.css">
+    
+ 
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Navigation Bar -->
+        <nav class="navbar">
+            <div class="logo">StudyPlanner</div>
+            <ul class="nav-links">
+                <li><a href="../Homepage/student_home.html"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="../About/about.html"><i class="fas fa-info-circle"></i> About Us</a></li>
+                <li><a href="create_scheduler.html" class="active"><i class="fas fa-plus-circle"></i> Create</a></li>
+                <li><a href="../Login/logout.html"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </nav>
+
+        <!-- Form Container -->
+        <div class="form-container">
+            <form id="scheduler-form" onsubmit="handleSubmit(event)">
+                <!-- Step 1: Number of Subjects -->
+                <div class="form-section">
+                    <h2>Step 1: Number of Subjects</h2>
+                    <div class="form-group">
+                        <label for="num-subjects">How many subjects are you studying?</label>
+                        <div style="display: flex; align-items: center;">
+                            <input type="number" id="num-subjects" min="1" max="10" required aria-describedby="num-subjects-error">
+                            <button type="button" class="action-btn" onclick="generateFields()">Add Subjects</button>
+                        </div>
+                        <span id="num-subjects-error" class="error">Please enter a number between 1 and 10.</span>
+                    </div>
+                </div>
+
+                <!-- Step 2: Subject Details -->
+                <div class="form-section" id="subject-details" style="display: none;">
+                    <h2>Step 2: Subject Details</h2>
+                    <div id="subjectContainer"></div>
+                </div>
+
+                <!-- Step 3: Exam Date -->
+                <div class="form-section" id="exam-info" style="display: none;">
+                    <h2>Step 3: Exam Information</h2>
+                    <div class="form-group tooltip">
+                        <label for="exam-date">When is your exam starting?</label>
+                        <input type="date" id="exam-date" required aria-describedby="exam-date-error">
+                        <span class="tooltip-text">Select the start date of your exams.</span>
+                        <span id="exam-date-error" class="error">Please select a valid future date.</span>
+                    </div>
+                </div>
+
+                <!-- Step 4: Study Hours -->
+                <div class="form-section" id="study-hours" style="display: none;">
+                    <h2>Step 4: Available Study Hours</h2>
+                    <div class="study-hours-grid">
+                        <div class="form-group tooltip">
+                            <label for="weekday-hours">Hours available on weekdays</label>
+                            <input type="number" id="weekday-hours" min="1" max="12" required aria-describedby="weekday-hours-error">
+                            <span class="tooltip-text">Enter hours you can study per weekday (1-12).</span>
+                            <span id="weekday-hours-error" class="error">Please enter a number between 1 and 12.</span>
+                        </div>
+                        <div class="form-group tooltip">
+                            <label for="weekend-hours">Hours available on weekends</label>
+                            <input type="number" id="weekend-hours" min="1" max="12" required aria-describedby="weekend-hours-error">
+                            <span class="tooltip-text">Enter hours you can study per weekend day (1-12).</span>
+                            <span id="weekend-hours-error" class="error">Please enter a number between 1 and 12.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="submit-btn" style="display: none;">
+                    <i class="fas fa-magic"></i> Generate Schedule
+                </button>
+            </form>
+        </div>
+
+        <!-- Footer -->
+     <div class="wrapper">
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <p><i class="fas fa-envelope"></i> Email: support@studyplanner.com</p>
+                <p><i class="fas fa-phone"></i> Phone: +1 234 567 890</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <a href="#"><i class="fas fa-comment"></i> Feedback</a><br>
+                    <a href="../About/terms.html"><i class="fas fa-file-contract"></i> Terms & Conditions</a><br>
+                    <a href="../About/about.html"><i class="fas fa-info-circle"></i> About Us</a>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+        <!--<div class="footer-bottom">
+            <p>&copy; 2024 StudyPlanner. All rights reserved.</p>
+        </div>!-->
+    </div>
+</div>
+</div>
+
+    </footer>
+
+    <script>
+        function generateFields() {
+            const num = parseInt(document.getElementById("num-subjects").value);
+            const container = document.getElementById("subjectContainer");
+            const error = document.getElementById("num-subjects-error");
+            container.innerHTML = ""; // Clear previous fields
+
+            if (num < 1 || num > 10 || isNaN(num)) {
+                error.style.display = "block";
+                return;
+            }
+            error.style.display = "none";
+
+            for (let i = 1; i <= num; i++) {
+                const subjectDiv = document.createElement("div");
+                subjectDiv.className = "subject-entry";
+
+                // Subject Name Input
+                const input = document.createElement("input");
+                input.type = "text";
+                input.placeholder = `Subject ${i} Name`;
+                input.required = true;
+                input.setAttribute("aria-label", `Subject ${i} name`);
+
+                // Difficulty Dropdown
+                const select = document.createElement("select");
+                select.innerHTML = `
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                `;
+                select.setAttribute("aria-label", `Difficulty for subject ${i}`);
+
+                // Marks Input
+                const marksInput = document.createElement("input");
+                marksInput.type = "number";
+                marksInput.placeholder = "Marks / 100";
+                marksInput.min = 0;
+                marksInput.max = 100;
+                marksInput.required = true;
+                marksInput.setAttribute("aria-label", `Marks for subject ${i}`);
+
+                // Append elements
+                subjectDiv.appendChild(input);
+                subjectDiv.appendChild(select);
+                subjectDiv.appendChild(marksInput);
+                container.appendChild(subjectDiv);
+            }
+
+            // Show next sections
+            document.getElementById("subject-details").style.display = "block";
+            document.getElementById("exam-info").style.display = "block";
+            document.getElementById("study-hours").style.display = "block";
+            document.querySelector(".submit-btn").style.display = "flex";
+        }
+
+        function handleSubmit(event) {
+            event.preventDefault();
+            const numSubjects = parseInt(document.getElementById("num-subjects").value);
+            const examDate = document.getElementById("exam-date").value;
+            const weekdayHours = parseInt(document.getElementById("weekday-hours").value);
+            const weekendHours = parseInt(document.getElementById("weekend-hours").value);
+            const subjects = Array.from(document.querySelectorAll(".subject-entry")).map(entry => ({
+                name: entry.querySelector("input[type='text']").value,
+                difficulty: entry.querySelector("select").value,
+                marks: parseInt(entry.querySelector("input[type='number']").value)
+            }));
+
+            // Basic validation
+            if (numSubjects < 1 || numSubjects > 10) {
+                document.getElementById("num-subjects-error").style.display = "block";
+                return;
+            }
+            if (!examDate || new Date(examDate) < new Date()) {
+                document.getElementById("exam-date-error").style.display = "block";
+                return;
+            }
+            if (weekdayHours < 1 || weekdayHours > 12) {
+                document.getElementById("weekday-hours-error").style.display = "block";
+                return;
+            }
+            if (weekendHours < 1 || weekendHours > 12) {
+                document.getElementById("weekend-hours-error").style.display = "block";
+                return;
+            }
+
+            // Example: Log form data (replace with actual submission logic)
+            console.log({
+                numSubjects,
+                subjects,
+                examDate,
+                weekdayHours,
+                weekendHours
+            });
+            alert("Schedule generated successfully! Check console for form data.");
+        }
+
+        // Real-time validation
+        document.getElementById("num-subjects").addEventListener("input", () => {
+            const num = parseInt(document.getElementById("num-subjects").value);
+            document.getElementById("num-subjects-error").style.display = (num < 1 || num > 10 || isNaN(num)) ? "block" : "none";
+        });
+        document.getElementById("exam-date").addEventListener("input", () => {
+            const date = new Date(document.getElementById("exam-date").value);
+            document.getElementById("exam-date-error").style.display = (date < new Date()) ? "block" : "none";
+        });
+        document.getElementById("weekday-hours").addEventListener("input", () => {
+            const hours = parseInt(document.getElementById("weekday-hours").value);
+            document.getElementById("weekday-hours-error").style.display = (hours < 1 || hours > 12 || isNaN(hours)) ? "block" : "none";
+        });
+        document.getElementById("weekend-hours").addEventListener("input", () => {
+            const hours = parseInt(document.getElementById("weekend-hours").value);
+            document.getElementById("weekend-hours-error").style.display = (hours < 1 || hours > 12 || isNaN(hours)) ? "block" : "none";
+        });
+    </script>
+</body>
+</html>
