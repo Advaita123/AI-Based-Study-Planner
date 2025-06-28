@@ -7,20 +7,22 @@
 
 
 body {
-    background-color: #f4f6f9;
+    background-color: #EAF4FB;
     color: #2d3436;
+    
 }
 /* Global Styles */
 html, body {
     height: 100%;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #f4f6f9;
-    color: #2c3e50;
+    color: #1e293b;
     display: flex;
     flex-direction: column;
 }
+
 .wrapper {
-    background-image:url(../pexels-brando-ltd-120530945-9869064.png);
+    background-color:#D9EAF5;
     background-size: cover;
     
 }
@@ -28,16 +30,17 @@ html, body {
 
 /* Navigation Bar */
 .navbar {
+    background-color:	#5b95cf;
     color: #2c3e50;
     padding: 1rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    position:relative;
+    
     width: 100%;
     top: 0;
     z-index: 1000;
-    /*box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 12px;*/
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 12px;
 }
 
 .logo {
@@ -65,6 +68,12 @@ html, body {
 .nav-links a:hover, .nav-links a.active {
     color:rgb(236, 238, 239);
 
+}
+/* Container */
+.container {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 1rem;
 }
 /* About Us Page Styles */
 .about-container {
@@ -255,12 +264,12 @@ html, body {
 
 /* Footer */
 .footer {
-    background: #1e293b;
+    background-color: #5b95cf;
     color: black;
     padding: 2rem 1rem;
     margin-top: auto;
-    background-color: rgba(255, 255, 255, 0.162); 
     backdrop-filter: blur(6px); 
+    border-radius: 12px;
 }
 .footer-content {
     display: flex;
@@ -295,3 +304,4 @@ html, body {
         grid-template-columns: 1fr;
     }
 }
+

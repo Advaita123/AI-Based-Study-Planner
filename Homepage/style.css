@@ -7,7 +7,7 @@
 
 
 body {
-    background-color: #f4f6f9;
+    background-color: #EAF4FB;
     color: #2d3436;
     
 }
@@ -22,7 +22,7 @@ html, body {
 }
 
 .wrapper {
-    background-image:url(../pexels-brando-ltd-120530945-9869064.png);
+    background-color:#D9EAF5;
     background-size: cover;
     
 }
@@ -30,6 +30,7 @@ html, body {
 
 /* Navigation Bar */
 .navbar {
+    background-color:	#5b95cf;
     color: #2c3e50;
     padding: 1rem 2rem;
     display: flex;
@@ -39,7 +40,7 @@ html, body {
     width: 100%;
     top: 0;
     z-index: 1000;
-    /*box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 12px;*/
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 12px;
 }
 
 .logo {
@@ -115,7 +116,7 @@ html, body {
 
 .stat-card i {
     font-size: 2rem;
-    color: #4C9AFF;
+    color: #5b95cf;
     margin-bottom: 1rem;
 }
 
@@ -127,7 +128,7 @@ html, body {
 .stat-card p {
     font-size: 1.5rem;
     font-weight: bold;
-    color: #4C9AFF;
+    color: #5b95cf;
 }
 
 /* Grid Container */
@@ -204,6 +205,38 @@ html, body {
     margin-bottom: 1rem;
 }
 
+.chat-message {
+    margin-bottom: 0.8rem;
+    padding: 0.8rem;
+    border-radius: 8px;
+    max-width: 80%;
+    word-wrap: break-word;
+}
+
+.user-message {
+    background-color: #5b95cf;
+    color: white;
+    margin-left: auto;
+    text-align: right;
+}
+
+.bot-message {
+    background-color: #ecf0f1;
+    color: #2c3e50;
+    margin-right: auto;
+}
+
+.chat-message.typing {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.chat-message.typing i {
+    margin-right: 0.5rem;
+    color: #3498db;
+}
+
 .chat-input {
     display: flex;
     gap: 0.5rem;
@@ -219,7 +252,7 @@ html, body {
 
 .chat-input button {
     padding: 0.8rem 1.2rem;
-    background-color: #4C9AFF;
+    background-color: #2c3e50;
     color: white;
     border: none;
     border-radius: 8px;
@@ -228,7 +261,12 @@ html, body {
 }
 
 .chat-input button:hover {
-    background-color: #A3BE8C;
+    background-color: #5b95cf;
+}
+
+.chat-input button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
 }
 
 /* Exam Countdown Section */
@@ -264,14 +302,14 @@ html, body {
 }
 
 .exam-date span {
-    color: #4C9AFF;
+    color: #2c3e50;
     font-weight: 500;
 }
 
 .countdown p {
     font-size: 2rem;
     font-weight: bold;
-    color: #4C9AFF;
+    color: #2c3e50;
     text-align: center;
 }
 
@@ -279,12 +317,12 @@ html, body {
 
 /* Footer */
 .footer {
-    background: #1e293b;
+    background-color: #5b95cf;
     color: black;
     padding: 2rem 1rem;
     margin-top: auto;
-    background-color: rgba(255, 255, 255, 0.162); 
     backdrop-filter: blur(6px); 
+    border-radius: 12px;
 }
 .footer-content {
     display: flex;

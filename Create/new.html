@@ -11,6 +11,7 @@
  
 </head>
 <body>
+     
     <div class="wrapper">
         <!-- Navigation Bar -->
         <nav class="navbar">
@@ -18,7 +19,7 @@
             <ul class="nav-links">
                 <li><a href="../Homepage/student_home.html"><i class="fas fa-home"></i> Home</a></li>
                 <li><a href="../About/about.html"><i class="fas fa-info-circle"></i> About Us</a></li>
-                <li><a href="create_scheduler.html" class="active"><i class="fas fa-plus-circle"></i> Create</a></li>
+                <li><a href="Create\new.html" class="active"><i class="fas fa-plus-circle"></i> Create</a></li>
                 <li><a href="../Login/logout.html"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
         </nav>
@@ -81,6 +82,9 @@
                 </button>
             </form>
         </div>
+
+        <!-- Results Section -->
+        <div id="schedule-results" class="results-section" style="display:none; margin-top: 2rem;"></div>
 
         <!-- Footer -->
      <div class="wrapper">
@@ -204,15 +208,148 @@
                 return;
             }
 
-            // Example: Log form data (replace with actual submission logic)
-            console.log({
-                numSubjects,
-                subjects,
-                examDate,
-                weekdayHours,
-                weekendHours
+            // Show loading state
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Schedule...';
+            submitBtn.disabled = true;
+
+            // Send data to comprehensive schedule endpoint
+            fetch('http://localhost:5000/api/generate_comprehensive_schedule', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    subjects: subjects,
+                    exam_date: examDate,
+                    weekday_hours: weekdayHours,
+                    weekend_hours: weekendHours
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Create comprehensive schedule display
+                let scheduleHTML = `
+                    <div class="schedule-header">
+                        <h2><i class="fas fa-calendar-alt"></i> Your Personalized Study Schedule</h2>
+                        <div class="schedule-summary">
+                            <div class="summary-item">
+                                <i class="fas fa-clock"></i>
+                                <span><strong>${data.days_left}</strong> days until exam</span>
+                            </div>
+                            <div class="summary-item">
+                                <i class="fas fa-chart-line"></i>
+                                <span><strong>${data.total_recommended_hours}</strong> hours recommended</span>
+                            </div>
+                            <div class="summary-item">
+                                <i class="fas fa-calendar-check"></i>
+                                <span><strong>${data.total_available_hours}</strong> hours available</span>
+                            </div>
+                            <div class="summary-item ${data.feasibility.toLowerCase()}">
+                                <i class="fas fa-${data.feasibility === 'Feasible' ? 'check-circle' : 'exclamation-triangle'}"></i>
+                                <span><strong>${data.feasibility}</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="subjects-schedule">
+                        <h3><i class="fas fa-book"></i> Subject-wise Study Plan</h3>
+                        <div class="subjects-grid">
+                `;
+                
+                data.subjects.forEach(subject => {
+                    const difficultyColor = {
+                        'Easy': '#28a745',
+                        'Medium': '#ffc107',
+                        'Hard': '#dc3545'
+                    };
+                    
+                    scheduleHTML += `
+                        <div class="subject-card">
+                            <div class="subject-header">
+                                <h4>${subject.name}</h4>
+                                <span class="difficulty-badge" style="background-color: ${difficultyColor[subject.difficulty]}">
+                                    ${subject.difficulty}
+                                </span>
+                            </div>
+                            <div class="subject-details">
+                                <div class="detail-item">
+                                    <i class="fas fa-star"></i>
+                                    <span>Current Marks: ${subject.marks}/100</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Recommended: ${subject.recommended_hours} hours</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-calendar-day"></i>
+                                    <span>Daily: ${subject.daily_hours} hours</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                scheduleHTML += `
+                        </div>
+                    </div>
+                `;
+                
+                // Add recommendations if any
+                if (data.recommendations && data.recommendations.length > 0) {
+                    scheduleHTML += `
+                        <div class="recommendations">
+                            <h3><i class="fas fa-lightbulb"></i> Study Recommendations</h3>
+                            <ul>
+                    `;
+                    data.recommendations.forEach(rec => {
+                        scheduleHTML += `<li>${rec}</li>`;
+                    });
+                    scheduleHTML += `
+                            </ul>
+                        </div>
+                    `;
+                }
+                
+                // Add study tips
+                scheduleHTML += `
+                    <div class="study-tips">
+                        <h3><i class="fas fa-tips"></i> Study Tips</h3>
+                        <ul>
+                            <li>Break down study sessions into 25-minute focused blocks with 5-minute breaks</li>
+                            <li>Review difficult topics first when your mind is fresh</li>
+                            <li>Use active recall techniques like flashcards and practice tests</li>
+                            <li>Create a quiet, distraction-free study environment</li>
+                            <li>Stay hydrated and take regular breaks to maintain focus</li>
+                        </ul>
+                    </div>
+                `;
+                
+                const resultsDiv = document.getElementById('schedule-results');
+                resultsDiv.innerHTML = scheduleHTML;
+                resultsDiv.style.display = 'block';
+                
+                // Scroll to results
+                resultsDiv.scrollIntoView({ behavior: 'smooth' });
+            })
+            .catch(err => {
+                const resultsDiv = document.getElementById('schedule-results');
+                resultsDiv.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Error generating schedule: ${err.message}</span>
+                    </div>
+                `;
+                resultsDiv.style.display = 'block';
+            })
+            .finally(() => {
+                // Reset button state
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
             });
-            alert("Schedule generated successfully! Check console for form data.");
         }
 
         // Real-time validation

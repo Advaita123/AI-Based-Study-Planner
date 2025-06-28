@@ -95,23 +95,50 @@ function initializeChatbot() {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
     
-    function handleUserMessage() {
+    function addTypingIndicator() {
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'chat-message bot-message typing';
+        typingDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> AI is thinking...';
+        chatMessages.appendChild(typingDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        return typingDiv;
+    }
+    
+    async function handleUserMessage() {
         const message = chatInput.value.trim();
         if (message) {
             addMessage(message, true);
             chatInput.value = '';
             
-            // Simulate bot response
-            setTimeout(() => {
-                const responses = [
-                    "I can help you with that! What specific topic would you like to discuss?",
-                    "That's an interesting question. Let me help you understand it better.",
-                    "I can provide you with study materials and practice questions for that topic.",
-                    "Would you like me to explain the concept step by step?"
-                ];
-                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                addMessage(randomResponse);
-            }, 1000);
+            // Show typing indicator
+            const typingIndicator = addTypingIndicator();
+            
+            try {
+                // Send message to Gemini AI backend
+                const response = await fetch('http://localhost:5000/api/chatbot', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const data = await response.json();
+                
+                // Remove typing indicator
+                typingIndicator.remove();
+                
+                if (data.status === 'success') {
+                    addMessage(data.response);
+                } else {
+                    addMessage("I'm sorry, I couldn't process your request. Please try again.");
+                }
+                
+            } catch (error) {
+                console.error('Chatbot error:', error);
+                typingIndicator.remove();
+                addMessage("I'm having trouble connecting right now. Please check your internet connection and try again.");
+            }
         }
     }
     
@@ -123,7 +150,7 @@ function initializeChatbot() {
     });
     
     // Add welcome message
-    addMessage("Hello! I'm your AI study assistant. How can I help you today?");
+    addMessage("Hello! I'm your AI study assistant powered by Gemini. I can help you with:\n• Explaining academic concepts\n• Study strategies and tips\n• Time management advice\n• Motivational support\n\nHow can I help you today?");
 }
 
 // Initialize everything when the page loads

@@ -7,7 +7,7 @@
 
 
 body {
-    background-color: #f4f6f9;
+    background-color: #EAF4FB;
     color: #2d3436;
     
 }
@@ -22,7 +22,7 @@ html, body {
 }
 
 .wrapper {
-    background-image:url(../pexels-brando-ltd-120530945-9869064.png);
+    background-color:#D9EAF5;
     background-size: cover;
     
 }
@@ -30,6 +30,7 @@ html, body {
 
 /* Navigation Bar */
 .navbar {
+    background-color:	#5b95cf;
     color: #2c3e50;
     padding: 1rem 2rem;
     display: flex;
@@ -39,7 +40,7 @@ html, body {
     width: 100%;
     top: 0;
     z-index: 1000;
-    /*box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 12px;*/
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 12px;
 }
 
 .logo {
@@ -112,7 +113,15 @@ html, body {
     font-weight: 500;
 }
 
-.login-form input[type="text"],
+.login-form input[type="email"]{
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
 .login-form input[type="password"] {
     width: 100%;
     padding: 0.8rem;
@@ -219,12 +228,12 @@ html, body {
 }
 /* Footer */
 .footer {
-    background: #1e293b;
+    background-color: #5b95cf;
     color: black;
     padding: 2rem 1rem;
     margin-top: auto;
-    background-color: rgba(255, 255, 255, 0.162); 
     backdrop-filter: blur(6px); 
+    border-radius: 12px;
 }
 .footer-content {
     display: flex;
@@ -258,4 +267,81 @@ html, body {
     .performance-grid {
         grid-template-columns: 1fr;
     }
+}
+
+
+/* Message Styles */
+.message {
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-top: 15px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.message.error {
+    background-color: #fee;
+    color: #c53030;
+    border: 1px solid #feb2b2;
+}
+
+.message.success {
+    background-color: #f0fff4;
+    color: #2f855a;
+    border: 1px solid #9ae6b4;
+}
+
+.message.info {
+    background-color: #ebf8ff;
+    color: #2b6cb0;
+    border: 1px solid #90cdf4;
+}
+
+/* Loading state */
+.login-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.fa-spin {
+    animation: fa-spin 1s infinite linear;
+}
+
+@keyframes fa-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Admin Link Styles */
+.admin-link {
+    text-align: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.admin-link p {
+    margin: 0;
+}
+
+.admin-link a {
+    color: #6c757d;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.admin-link a:hover {
+    color: #5b95cf;
+}
+
+.admin-link i {
+    font-size: 1rem;
 }

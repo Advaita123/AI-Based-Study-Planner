@@ -7,6 +7,11 @@
     <link rel="stylesheet" href="../styles.css">
     <link rel="stylesheet" href="login_styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    
     <style>
         .logout-container {
             max-width: 600px;
@@ -152,14 +157,43 @@
     </footer>
 </div>
 
+<script src="firebase-config.js"></script>
 <script>
+    // Firebase configuration (same as in firebase-config.js)
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT_ID.appspot.com",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Sign out from Firebase
+    auth.signOut().then(() => {
+        // Clear local storage
+        localStorage.removeItem("userRole");
+        localStorage.removeItem("username");
+        localStorage.removeItem("userId");
+        
+        console.log("User signed out successfully");
+    }).catch((error) => {
+        console.error("Error signing out:", error);
+    });
+
     // Countdown timer for automatic redirect
     let timeLeft = 5;
     const timerElement = document.getElementById('timer');
     
     const countdown = setInterval(() => {
         timeLeft--;
-        timerElement.textContent = timeLeft;
+        if (timerElement) {
+            timerElement.textContent = timeLeft;
+        }
         
         if (timeLeft <= 0) {
             clearInterval(countdown);
