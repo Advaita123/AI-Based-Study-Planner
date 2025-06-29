@@ -5,21 +5,138 @@ import joblib
 import numpy as np
 import google.generativeai as genai
 import os
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///studyplanner.db'
 db = SQLAlchemy(app)
 
-# Load ML model
-ml_model = joblib.load('../study_scheduler_model.pkl')
+# User Schedule Model
+class UserSchedule(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_email = db.Column(db.String(120), nullable=False)
+    exam_date = db.Column(db.String(10), nullable=False)
+    days_left = db.Column(db.Integer, nullable=False)
+    total_recommended_hours = db.Column(db.Float, nullable=False)
+    total_available_hours = db.Column(db.Float, nullable=False)
+    feasibility = db.Column(db.String(20), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationship with subjects
+    subjects = db.relationship('SubjectSchedule', backref='user_schedule', lazy=True, cascade="all, delete-orphan")
 
-# Configure Gemini AI
+class SubjectSchedule(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_schedule_id = db.Column(db.Integer, db.ForeignKey('user_schedule.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    difficulty = db.Column(db.String(20), nullable=False)
+    marks = db.Column(db.Integer, nullable=False)
+    recommended_hours = db.Column(db.Float, nullable=False)
+    daily_hours = db.Column(db.Float, nullable=False)
+
+# Create database tables
+with app.app_context():
+    db.create_all()
+
+# Load ML model with proper error handling
+try:
+    # Try multiple possible paths for the model
+    model_paths = [
+        'study_scheduler_model.pkl',
+        '../study_scheduler_model.pkl',
+        './study_scheduler_model.pkl'
+    ]
+    
+    ml_model = None
+    for path in model_paths:
+        if os.path.exists(path):
+            ml_model = joblib.load(path)
+            print(f"ML model loaded successfully from: {path}")
+            break
+    
+    if ml_model is None:
+        print("Warning: ML model not found. Using fallback predictions.")
+        ml_model = None
+except Exception as e:
+    print(f"Error loading ML model: {e}")
+    ml_model = None
+
+# Configure Gemini AI with better error handling
 GEMINI_API_KEY = "AIzaSyAa0VR5gJ6WuTKK_NqrPNgFpiTPBs10WNQ" 
-genai.configure(api_key=GEMINI_API_KEY)
 
-# Initialize Gemini model
-model = genai.GenerativeModel('gemini-pro')
+try:
+    genai.configure(api_key=GEMINI_API_KEY)
+    # Test the API key by making a simple call with the correct model name
+    test_model = genai.GenerativeModel('gemini-1.5-flash')
+    test_response = test_model.generate_content("Hello")
+    print("Gemini API configured successfully")
+    model = test_model
+except Exception as e:
+    print(f"Gemini API configuration failed: {e}")
+    # Try alternative model names
+    try:
+        test_model = genai.GenerativeModel('gemini-1.5-pro')
+        test_response = test_model.generate_content("Hello")
+        print("Gemini API configured successfully with gemini-1.5-pro")
+        model = test_model
+    except Exception as e2:
+        print(f"Alternative Gemini model also failed: {e2}")
+        model = None
+
+# Fallback responses for when Gemini is not available
+FALLBACK_RESPONSES = {
+    "study_tips": [
+        "Break down your study sessions into 25-minute focused blocks with 5-minute breaks (Pomodoro Technique).",
+        "Review difficult topics first when your mind is fresh in the morning.",
+        "Use active recall techniques like flashcards and practice tests instead of passive reading.",
+        "Create a quiet, distraction-free study environment.",
+        "Stay hydrated and take regular breaks to maintain focus.",
+        "Summarize what you've learned in your own words to reinforce understanding.",
+        "Teach the material to someone else - it's one of the best ways to learn.",
+        "Use spaced repetition to review material at increasing intervals."
+    ],
+    "motivation": [
+        "Remember why you started - your goals are worth the effort!",
+        "Every small step forward is progress. Celebrate your achievements.",
+        "You're building skills that will serve you for life.",
+        "The only bad study session is the one that didn't happen.",
+        "Your future self will thank you for the work you do today.",
+        "You have the power to shape your academic success.",
+        "Every expert was once a beginner. Keep going!",
+        "Your dedication to learning is admirable and will pay off."
+    ],
+    "time_management": [
+        "Create a daily schedule and stick to it as much as possible.",
+        "Prioritize tasks using the Eisenhower Matrix (urgent vs important).",
+        "Use time blocking to allocate specific time slots for different subjects.",
+        "Avoid multitasking - focus on one subject at a time.",
+        "Set realistic goals and break large tasks into smaller, manageable chunks.",
+        "Use a timer to stay focused during study sessions.",
+        "Review and adjust your schedule weekly based on what's working.",
+        "Don't forget to schedule breaks and relaxation time."
+    ],
+    "general": [
+        "I'm here to help you with your studies! What specific topic would you like to discuss?",
+        "Great question! Let me help you with that.",
+        "That's an interesting study-related question. Here's what I can suggest...",
+        "I'd be happy to help you with your academic questions.",
+        "Let's work on improving your study skills together!"
+    ]
+}
+
+def get_fallback_response(user_message):
+    """Get a relevant fallback response based on the user's message"""
+    message_lower = user_message.lower()
+    
+    if any(word in message_lower for word in ['tip', 'advice', 'how', 'method', 'technique']):
+        return FALLBACK_RESPONSES["study_tips"][0]
+    elif any(word in message_lower for word in ['motivate', 'encourage', 'tired', 'difficult', 'hard']):
+        return FALLBACK_RESPONSES["motivation"][0]
+    elif any(word in message_lower for word in ['time', 'schedule', 'organize', 'plan']):
+        return FALLBACK_RESPONSES["time_management"][0]
+    else:
+        return FALLBACK_RESPONSES["general"][0]
 
 @app.route('/api/chatbot', methods=['POST'])
 def chatbot_response():
@@ -30,24 +147,47 @@ def chatbot_response():
         if not user_message:
             return jsonify({'error': 'No message provided'}), 400
         
-        # Create a context-aware prompt for study-related queries
-        system_prompt = """You are an AI study assistant for students. You help with:
-        - Explaining academic concepts
-        - Providing study tips and strategies
-        - Answering questions about various subjects
-        - Giving motivational advice for studying
-        - Helping with time management and organization
+        print(f"Chatbot received message: {user_message}")
         
-        Keep responses helpful, encouraging, and educational. If the question is not study-related, politely redirect to study topics."""
+        # Try Gemini API first
+        if model is not None:
+            try:
+                # Create a context-aware prompt for study-related queries
+                system_prompt = """You are an AI study assistant for students. You help with:
+                - Explaining academic concepts
+                - Providing study tips and strategies
+                - Answering questions about various subjects
+                - Giving motivational advice for studying
+                - Helping with time management and organization
+                
+                Keep responses helpful, encouraging, and educational. If the question is not study-related, politely redirect to study topics.
+                Keep responses concise but informative (2-3 sentences)."""
+                
+                # Combine system prompt with user message
+                full_prompt = f"{system_prompt}\n\nStudent: {user_message}\n\nAssistant:"
+                
+                print("Attempting Gemini API call...")
+                response = model.generate_content(full_prompt)
+                
+                if response and response.text:
+                    print("Gemini API call successful")
+                    return jsonify({
+                        'response': response.text,
+                        'status': 'success'
+                    })
+                else:
+                    raise Exception("Empty response from Gemini")
+                    
+            except Exception as gemini_error:
+                print(f"Gemini API error: {gemini_error}")
+                # Fall through to fallback response
         
-        # Combine system prompt with user message
-        full_prompt = f"{system_prompt}\n\nStudent: {user_message}\n\nAssistant:"
-        
-        # Generate response using Gemini
-        response = model.generate_content(full_prompt)
+        # Use fallback response if Gemini fails
+        print("Using fallback response")
+        fallback_response = get_fallback_response(user_message)
         
         return jsonify({
-            'response': response.text,
+            'response': fallback_response,
             'status': 'success'
         })
         
@@ -56,7 +196,7 @@ def chatbot_response():
         return jsonify({
             'response': "I'm sorry, I'm having trouble processing your request right now. Please try again later.",
             'status': 'error'
-        }), 500 
+        }), 500
 
 @app.route('/api/generate_comprehensive_schedule', methods=['POST'])
 def generate_comprehensive_schedule():
@@ -66,12 +206,12 @@ def generate_comprehensive_schedule():
         exam_date = data.get('exam_date', '')
         weekday_hours = data.get('weekday_hours', 0)
         weekend_hours = data.get('weekend_hours', 0)
+        user_email = data.get('user_email', '')  # Add user email
         
         if not subjects or not exam_date:
             return jsonify({'error': 'Missing required data'}), 400
         
         # Calculate days left until exam
-        from datetime import datetime
         exam = datetime.strptime(exam_date, '%Y-%m-%d')
         today = datetime.now()
         days_left = (exam - today).days
@@ -79,7 +219,7 @@ def generate_comprehensive_schedule():
         if days_left <= 0:
             return jsonify({'error': 'Exam date must be in the future'}), 400
         
-        # Generate recommended hours for each subject using ML model
+        # Generate recommended hours for each subject
         subject_schedules = []
         total_recommended_hours = 0
         
@@ -88,9 +228,16 @@ def generate_comprehensive_schedule():
             difficulty_map = {'Easy': 1, 'Medium': 2, 'Hard': 3}
             difficulty_num = difficulty_map.get(subject['difficulty'], 2)
             
-            # Get ML prediction
-            features = np.array([[difficulty_num, subject['marks'], days_left]])
-            recommended_hours = ml_model.predict(features)[0]
+            # Get prediction (ML model or fallback)
+            if ml_model is not None:
+                try:
+                    features = np.array([[difficulty_num, subject['marks'], days_left]])
+                    recommended_hours = ml_model.predict(features)[0]
+                except Exception as e:
+                    print(f"ML prediction failed, using fallback: {e}")
+                    recommended_hours = fallback_prediction(subject['difficulty'], subject['marks'], days_left)
+            else:
+                recommended_hours = fallback_prediction(subject['difficulty'], subject['marks'], days_left)
             
             subject_schedules.append({
                 'name': subject['name'],
@@ -107,6 +254,9 @@ def generate_comprehensive_schedule():
         weekly_available = weekdays_available + weekends_available
         total_available = (days_left // 7) * weekly_available + (days_left % 7) * weekday_hours
         
+        # Determine feasibility
+        feasibility = 'Feasible' if total_available >= total_recommended_hours else 'Challenging'
+        
         # Create detailed schedule
         schedule = {
             'exam_date': exam_date,
@@ -115,7 +265,7 @@ def generate_comprehensive_schedule():
             'total_recommended_hours': round(total_recommended_hours, 2),
             'total_available_hours': round(total_available, 2),
             'weekly_available_hours': round(weekly_available, 2),
-            'feasibility': 'Feasible' if total_available >= total_recommended_hours else 'Challenging',
+            'feasibility': feasibility,
             'recommendations': []
         }
         
@@ -130,6 +280,45 @@ def generate_comprehensive_schedule():
         hard_subjects = [s for s in subject_schedules if s['difficulty'] == 'Hard']
         if hard_subjects:
             schedule['recommendations'].append(f"Focus more time on {', '.join([s['name'] for s in hard_subjects])} (difficult subjects)")
+        
+        # Save schedule to database if user email is provided
+        if user_email:
+            try:
+                # Delete existing schedule for this user
+                existing_schedule = UserSchedule.query.filter_by(user_email=user_email).first()
+                if existing_schedule:
+                    db.session.delete(existing_schedule)
+                
+                # Create new schedule
+                new_schedule = UserSchedule(
+                    user_email=user_email,
+                    exam_date=exam_date,
+                    days_left=days_left,
+                    total_recommended_hours=total_recommended_hours,
+                    total_available_hours=total_available,
+                    feasibility=feasibility
+                )
+                db.session.add(new_schedule)
+                db.session.flush()  # Get the ID
+                
+                # Add subjects
+                for subject in subject_schedules:
+                    subject_schedule = SubjectSchedule(
+                        user_schedule_id=new_schedule.id,
+                        name=subject['name'],
+                        difficulty=subject['difficulty'],
+                        marks=subject['marks'],
+                        recommended_hours=subject['recommended_hours'],
+                        daily_hours=subject['daily_hours']
+                    )
+                    db.session.add(subject_schedule)
+                
+                db.session.commit()
+                print(f"Schedule saved for user: {user_email}")
+                
+            except Exception as e:
+                print(f"Error saving schedule to database: {e}")
+                db.session.rollback()
         
         return jsonify(schedule)
         
@@ -146,35 +335,41 @@ def get_user_schedule():
         if not user_email:
             return jsonify({'error': 'User email required'}), 400
         
-        # Get user's schedule from database (you can implement this based on your needs)
-        # For now, return a sample schedule
-        schedule = {
-            'user_email': user_email,
-            'subjects': [
-                {
-                    'name': 'Mathematics',
-                    'difficulty': 'Hard',
-                    'recommended_hours': 40,
-                    'daily_hours': 2.5
-                },
-                {
-                    'name': 'Physics',
-                    'difficulty': 'Medium',
-                    'recommended_hours': 30,
-                    'daily_hours': 2.0
-                },
-                {
-                    'name': 'Chemistry',
-                    'difficulty': 'Easy',
-                    'recommended_hours': 25,
-                    'daily_hours': 1.5
-                }
-            ],
-            'exam_date': '2024-06-15',
-            'total_recommended_hours': 95
-        }
+        # Get user's schedule from database
+        user_schedule = UserSchedule.query.filter_by(user_email=user_email).first()
         
-        return jsonify({'schedule': schedule})
+        if user_schedule:
+            # Get subjects for this schedule
+            subjects = []
+            for subject in user_schedule.subjects:
+                subjects.append({
+                    'name': subject.name,
+                    'difficulty': subject.difficulty,
+                    'marks': subject.marks,
+                    'recommended_hours': subject.recommended_hours,
+                    'daily_hours': subject.daily_hours
+                })
+            
+            schedule = {
+                'user_email': user_email,
+                'subjects': subjects,
+                'exam_date': user_schedule.exam_date,
+                'days_left': user_schedule.days_left,
+                'total_recommended_hours': user_schedule.total_recommended_hours,
+                'feasibility': user_schedule.feasibility
+            }
+            
+            return jsonify({'schedule': schedule})
+        else:
+            # Return empty schedule if none exists
+            return jsonify({'schedule': {
+                'user_email': user_email,
+                'subjects': [],
+                'exam_date': '',
+                'days_left': 0,
+                'total_recommended_hours': 0,
+                'feasibility': 'No Schedule'
+            }})
         
     except Exception as e:
         print(f"Error getting user schedule: {str(e)}")
@@ -267,14 +462,14 @@ def get_teacher_progress():
             ],
             'recent_entries': [
                 {
-                    'date': '2024-01-15',
+                    'date': '2025-01-15',
                     'subject': 'Mathematics',
                     'hours': 2.5,
                     'topics': 'Calculus integration and differentiation',
                     'confidence': 8
                 },
                 {
-                    'date': '2024-01-14',
+                    'date': '2025-01-14',
                     'subject': 'Physics',
                     'hours': 2.0,
                     'topics': 'Mechanics and Newton\'s laws',
@@ -288,3 +483,15 @@ def get_teacher_progress():
     except Exception as e:
         print(f"Error getting teacher progress: {str(e)}")
         return jsonify({'error': 'Error retrieving progress data'}), 500 
+@app.route('/api/stats', methods=['GET'])
+def get_stats():
+    return jsonify({
+        "pending_tasks": 3,
+        "notification_count": 2,
+        "overall_progress": 75
+    })
+
+if __name__ == "__main__":
+    print(" Starting Flask server on http://127.0.0.1:5000 ...")
+    app.run(host="127.0.0.1", port=5000, debug=True)
+

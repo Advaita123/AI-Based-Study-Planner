@@ -1,3 +1,22 @@
+// Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyDQ2o2ZcWZaH0di-DJV9EkLw-4LomO81_Y",
+    authDomain: "studyscheduler-88ae1.firebaseapp.com",
+    projectId: "studyscheduler-88ae1",
+    storageBucket: "studyscheduler-88ae1.firebasestorage.app",
+    messagingSenderId: "789024560599",
+    appId: "1:789024560599:web:08358b5764ec25f8aca792",
+    measurementId: "G-M7P873NEYF"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+// Global variables
+let currentUser = null;
+let userSchedule = null;
+
 // Update current date
 function updateDate() {
     const date = new Date();
@@ -7,78 +26,185 @@ function updateDate() {
 
 // Calculate days left until exam
 function updateExamCountdown() {
-    const examStartDate = new Date('2024-05-15');
-    const today = new Date();
-    const diffTime = examStartDate - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays < 0) {
-        document.getElementById('days-left').textContent = 'Completed';
-        document.getElementById('days-left').style.color = '#A3BE8C'; // Green color for completed
+    if (userSchedule && userSchedule.exam_date) {
+        const examStartDate = new Date(userSchedule.exam_date);
+        const today = new Date();
+        const diffTime = examStartDate - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays < 0) {
+            document.getElementById('days-left').textContent = 'Completed';
+            document.getElementById('days-left').style.color = '#A3BE8C'; // Green color for completed
+        } else {
+            document.getElementById('days-left').textContent = diffDays;
+            document.getElementById('days-left').style.color = '#4C9AFF'; // Blue color for upcoming
+        }
+        
+        // Update exam name and dates
+        document.getElementById('exam-name').textContent = 'Final Exams';
+        document.getElementById('exam-start').innerHTML = `Start: <span>${userSchedule.exam_date}</span>`;
+        document.getElementById('exam-end').innerHTML = `End: <span>${userSchedule.exam_date}</span>`;
     } else {
-        document.getElementById('days-left').textContent = diffDays;
-        document.getElementById('days-left').style.color = '#4C9AFF'; // Blue color for upcoming
+        // Default values if no schedule
+        document.getElementById('days-left').textContent = '0';
+        document.getElementById('exam-name').textContent = 'No Schedule Set';
+        document.getElementById('exam-start').innerHTML = 'Start: <span>Create a schedule first</span>';
+        document.getElementById('exam-end').innerHTML = 'End: <span>Create a schedule first</span>';
     }
 }
 
-// Sample data for demonstration
-const sampleData = {
-    studentName: "Advaita",
-    pendingTasks: 5,
-    notifications: 3,
-    overallProgress: 75,
-    schedule: [
-        { time: "09:00 AM", subject: "Mathematics", duration: "1 hour" },
-        { time: "10:30 AM", subject: "Physics", duration: "1.5 hours" },
-        { time: "02:00 PM", subject: "Chemistry", duration: "1 hour" }
-    ],
-    subjects: [
-        { name: "Mathematics", difficulty: "Hard", progress: 80 },
-        { name: "Physics", difficulty: "Medium", progress: 65 },
-        { name: "Chemistry", difficulty: "Easy", progress: 90 },
-        { name: "Biology", difficulty: "Medium", progress: 75 }
-    ]
-};
+// Load user schedule from backend
+async function loadUserSchedule() {
+    try {
+        if (!currentUser) {
+            console.log("No user logged in");
+            return;
+        }
+
+        const response = await fetch('http://localhost:5000/api/user_schedule', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                user_email: currentUser.email
+            })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            userSchedule = data.schedule;
+            console.log("User schedule loaded:", userSchedule);
+            
+            // Update dashboard with real schedule data
+            updateDashboardWithSchedule();
+        } else {
+            console.log("No schedule found for user");
+            userSchedule = null;
+        }
+    } catch (error) {
+        console.error('Error loading user schedule:', error);
+        userSchedule = null;
+    }
+}
+
+// Update dashboard with schedule data
+function updateDashboardWithSchedule() {
+    if (!userSchedule || !userSchedule.subjects || userSchedule.subjects.length === 0) {
+        // Show default/empty state
+        showEmptyScheduleState();
+        return;
+    }
+
+    // Update stats based on schedule
+    const totalSubjects = userSchedule.subjects.length;
+    const totalHours = userSchedule.subjects.reduce((sum, subject) => sum + subject.recommended_hours, 0);
+    const avgProgress = userSchedule.subjects.reduce((sum, subject) => sum + (subject.marks || 0), 0) / totalSubjects;
+    
+    document.getElementById('pending-tasks').textContent = totalSubjects;
+    document.getElementById('notification-count').textContent = Math.ceil(totalHours / 10); // Notifications based on study hours
+    document.getElementById('overall-progress').textContent = `${Math.round(avgProgress)}%`;
+    
+    // Populate schedule with real data
+    populateSchedule();
+    
+    // Populate difficulty levels with real data
+    populateDifficultyLevels();
+}
+
+// Show empty schedule state
+function showEmptyScheduleState() {
+    const scheduleList = document.getElementById('schedule-list');
+    scheduleList.innerHTML = `
+        <div class="empty-schedule">
+            <i class="fas fa-calendar-plus"></i>
+            <p>No schedule created yet</p>
+            <a href="../Create/new.html" class="create-schedule-btn">
+                <i class="fas fa-plus"></i> Create Schedule
+            </a>
+        </div>
+    `;
+    
+    const difficultyList = document.getElementById('difficulty-list');
+    difficultyList.innerHTML = `
+        <div class="empty-subjects">
+            <i class="fas fa-book-open"></i>
+            <p>Add subjects to see difficulty levels</p>
+        </div>
+    `;
+    
+    // Update stats
+    document.getElementById('pending-tasks').textContent = '0';
+    document.getElementById('notification-count').textContent = '0';
+    document.getElementById('overall-progress').textContent = '0%';
+}
+
+// Populate schedule with real data
+function populateSchedule() {
+    const scheduleList = document.getElementById('schedule-list');
+    scheduleList.innerHTML = '';
+    
+    if (userSchedule && userSchedule.subjects) {
+        userSchedule.subjects.forEach((subject, index) => {
+            const scheduleItem = document.createElement('div');
+            scheduleItem.className = 'schedule-item';
+            
+            // Calculate time based on subject order
+            const startHour = 9 + (index * 2); // Start at 9 AM, 2-hour intervals
+            const time = `${startHour}:00 ${startHour >= 12 ? 'PM' : 'AM'}`;
+            
+            scheduleItem.innerHTML = `
+                <div>
+                    <strong>${time}</strong>
+                    <p>${subject.name}</p>
+                </div>
+                <span>${subject.daily_hours} hours</span>
+            `;
+            scheduleList.appendChild(scheduleItem);
+        });
+    }
+}
+
+// Populate difficulty levels with real data
+function populateDifficultyLevels() {
+    const difficultyList = document.getElementById('difficulty-list');
+    difficultyList.innerHTML = '';
+    
+    if (userSchedule && userSchedule.subjects) {
+        userSchedule.subjects.forEach(subject => {
+            const difficultyItem = document.createElement('div');
+            difficultyItem.className = 'difficulty-item';
+            
+            const difficultyColor = {
+                'Easy': '#28a745',
+                'Medium': '#ffc107',
+                'Hard': '#dc3545'
+            };
+            
+            difficultyItem.innerHTML = `
+                <div>
+                    <strong>${subject.name}</strong>
+                    <p style="color: ${difficultyColor[subject.difficulty]}">${subject.difficulty}</p>
+                </div>
+                <span>${subject.marks || 0}%</span>
+            `;
+            difficultyList.appendChild(difficultyItem);
+        });
+    }
+}
 
 // Initialize the dashboard
 function initializeDashboard() {
-    // Set student name
-    document.getElementById('student-name').textContent = sampleData.studentName;
+    // Set student name from Firebase user
+    if (currentUser) {
+        const displayName = currentUser.displayName || currentUser.email.split('@')[0];
+        document.getElementById('student-name').textContent = displayName;
+    } else {
+        document.getElementById('student-name').textContent = "Student";
+    }
     
-    // Update stats
-    document.getElementById('pending-tasks').textContent = sampleData.pendingTasks;
-    document.getElementById('notification-count').textContent = sampleData.notifications;
-    document.getElementById('overall-progress').textContent = `${sampleData.overallProgress}%`;
-    
-    // Populate schedule
-    const scheduleList = document.getElementById('schedule-list');
-    sampleData.schedule.forEach(item => {
-        const scheduleItem = document.createElement('div');
-        scheduleItem.className = 'schedule-item';
-        scheduleItem.innerHTML = `
-            <div>
-                <strong>${item.time}</strong>
-                <p>${item.subject}</p>
-            </div>
-            <span>${item.duration}</span>
-        `;
-        scheduleList.appendChild(scheduleItem);
-    });
-    
-    // Populate difficulty levels
-    const difficultyList = document.getElementById('difficulty-list');
-    sampleData.subjects.forEach(subject => {
-        const difficultyItem = document.createElement('div');
-        difficultyItem.className = 'difficulty-item';
-        difficultyItem.innerHTML = `
-            <div>
-                <strong>${subject.name}</strong>
-                <p>${subject.difficulty}</p>
-            </div>
-            <span>${subject.progress}%</span>
-        `;
-        difficultyList.appendChild(difficultyItem);
-    });
+    // Load user schedule and update dashboard
+    loadUserSchedule();
 }
 
 // Chatbot functionality
@@ -153,10 +279,26 @@ function initializeChatbot() {
     addMessage("Hello! I'm your AI study assistant powered by Gemini. I can help you with:\n• Explaining academic concepts\n• Study strategies and tips\n• Time management advice\n• Motivational support\n\nHow can I help you today?");
 }
 
+// Check authentication and initialize
+function checkAuthAndInitialize() {
+    auth.onAuthStateChanged(function(user) {
+        if (user) {
+            currentUser = user;
+            console.log('User authenticated:', user.email);
+            
+            // Initialize dashboard after authentication
+            updateDate();
+            updateExamCountdown();
+            initializeDashboard();
+            initializeChatbot();
+        } else {
+            // Redirect to login if not authenticated
+            window.location.href = '../Login/login.html';
+        }
+    });
+}
+
 // Initialize everything when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-    updateDate();
-    updateExamCountdown();
-    initializeDashboard();
-    initializeChatbot();
+    checkAuthAndInitialize();
 }); 

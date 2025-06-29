@@ -357,3 +357,209 @@ html, body {
         grid-template-columns: 1fr;
     }
 }
+
+/* Empty Schedule State */
+.empty-schedule, .empty-subjects {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    border: 2px dashed #dee2e6;
+}
+
+.empty-schedule i, .empty-subjects i {
+    font-size: 3rem;
+    color: #adb5bd;
+    margin-bottom: 1rem;
+}
+
+.empty-schedule p, .empty-subjects p {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.create-schedule-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #5b95cf;
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.create-schedule-btn:hover {
+    background-color: #4a7caf;
+    color: white;
+    text-decoration: none;
+}
+
+/* Schedule Items Enhancement */
+.schedule-item {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 0.8rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+    border-left: 4px solid #5b95cf;
+}
+
+.schedule-item:hover {
+    transform: translateX(5px);
+}
+
+.schedule-item strong {
+    color: #2c3e50;
+    font-size: 1.1rem;
+}
+
+.schedule-item p {
+    color: #5b95cf;
+    margin: 0.3rem 0;
+    font-weight: 500;
+}
+
+.schedule-item span {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* Difficulty Items Enhancement */
+.difficulty-item {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 0.8rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+}
+
+.difficulty-item:hover {
+    transform: translateX(5px);
+}
+
+.difficulty-item strong {
+    color: #2c3e50;
+    font-size: 1.1rem;
+}
+
+.difficulty-item p {
+    margin: 0.3rem 0;
+    font-weight: 600;
+}
+
+.difficulty-item span {
+    color: #6c757d;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Exam Countdown Enhancement */
+.exam-info {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 1.5rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.exam-date h3 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+.exam-date p {
+    color: #6c757d;
+    margin: 0.5rem 0;
+    font-size: 1rem;
+}
+
+.exam-date span {
+    color: #5b95cf;
+    font-weight: 600;
+}
+
+.countdown h3 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+.countdown p {
+    color: #5b95cf;
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 0;
+    text-align: center;
+}
+
+/* Stats Enhancement */
+.stat-card {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 1.5rem;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+    border-left: 4px solid #5b95cf;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-card i {
+    font-size: 2.5rem;
+    color: #5b95cf;
+    margin-bottom: 1rem;
+}
+
+.stat-card h3 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.stat-card p {
+    color: #5b95cf;
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .empty-schedule, .empty-subjects {
+        padding: 1.5rem;
+    }
+    
+    .empty-schedule i, .empty-subjects i {
+        font-size: 2.5rem;
+    }
+    
+    .create-schedule-btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+    }
+    
+    .schedule-item, .difficulty-item {
+        padding: 0.8rem;
+    }
+    
+    .stat-card {
+        padding: 1.2rem;
+    }
+    
+    .stat-card i {
+        font-size: 2rem;
+    }
+    
+    .stat-card p {
+        font-size: 1.5rem;
+    }
+}

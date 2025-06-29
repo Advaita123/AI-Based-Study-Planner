@@ -8,7 +8,9 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="create_scheduler.css">
     
- 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 </head>
 <body>
      
@@ -19,7 +21,8 @@
             <ul class="nav-links">
                 <li><a href="../Homepage/student_home.html"><i class="fas fa-home"></i> Home</a></li>
                 <li><a href="../About/about.html"><i class="fas fa-info-circle"></i> About Us</a></li>
-                <li><a href="Create\new.html" class="active"><i class="fas fa-plus-circle"></i> Create</a></li>
+                <li><a href="new.html" class="active"><i class="fas fa-plus-circle"></i> Create</a></li>
+                <li><a href="../Progress/student_progress.html"><i class="fas fa-chart-line"></i> Progress</a></li>
                 <li><a href="../Login/logout.html"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
         </nav>
@@ -113,16 +116,35 @@
                 </div>
             </div>
         </div>
-        <!--<div class="footer-bottom">
-            <p>&copy; 2024 StudyPlanner. All rights reserved.</p>
-        </div>!-->
     </div>
-</div>
 </div>
 
     </footer>
 
     <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDQ2o2ZcWZaH0di-DJV9EkLw-4LomO81_Y",
+            authDomain: "studyscheduler-88ae1.firebaseapp.com",
+            projectId: "studyscheduler-88ae1",
+            storageBucket: "studyscheduler-88ae1.firebasestorage.app",
+            messagingSenderId: "789024560599",
+            appId: "1:789024560599:web:08358b5764ec25f8aca792",
+            measurementId: "G-M7P873NEYF"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // Check authentication on page load
+        auth.onAuthStateChanged(function(user) {
+            if (!user) {
+                // Redirect to login if not authenticated
+                window.location.href = '../Login/login.html';
+            }
+        });
+
         function generateFields() {
             const num = parseInt(document.getElementById("num-subjects").value);
             const container = document.getElementById("subjectContainer");
@@ -180,6 +202,15 @@
 
         function handleSubmit(event) {
             event.preventDefault();
+            
+            // Check if user is authenticated
+            const user = auth.currentUser;
+            if (!user) {
+                alert("Please log in to generate a schedule.");
+                window.location.href = '../Login/login.html';
+                return;
+            }
+
             const numSubjects = parseInt(document.getElementById("num-subjects").value);
             const examDate = document.getElementById("exam-date").value;
             const weekdayHours = parseInt(document.getElementById("weekday-hours").value);
@@ -214,7 +245,7 @@
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Schedule...';
             submitBtn.disabled = true;
 
-            // Send data to comprehensive schedule endpoint
+            // Send data to comprehensive schedule endpoint with user email
             fetch('http://localhost:5000/api/generate_comprehensive_schedule', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -222,7 +253,8 @@
                     subjects: subjects,
                     exam_date: examDate,
                     weekday_hours: weekdayHours,
-                    weekend_hours: weekendHours
+                    weekend_hours: weekendHours,
+                    user_email: user.email  // Add user email
                 })
             })
             .then(res => res.json())
@@ -334,8 +366,12 @@
                 
                 // Scroll to results
                 resultsDiv.scrollIntoView({ behavior: 'smooth' });
+                
+                // Show success message
+                showMessage("Schedule generated successfully! Check your homepage for updates.", "success");
             })
             .catch(err => {
+                console.error("Schedule generation error:", err);
                 const resultsDiv = document.getElementById('schedule-results');
                 resultsDiv.innerHTML = `
                     <div class="error-message">
@@ -350,6 +386,32 @@
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
             });
+        }
+
+        // Show message function
+        function showMessage(message, type = 'info') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = message;
+            messageDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem;
+                border-radius: 8px;
+                color: white;
+                font-weight: 500;
+                z-index: 1000;
+                ${type === 'success' ? 'background-color: #28a745;' : 
+                  type === 'error' ? 'background-color: #dc3545;' : 
+                  'background-color: #17a2b8;'}
+            `;
+            
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
         }
 
         // Real-time validation
