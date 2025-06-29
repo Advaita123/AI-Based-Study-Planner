@@ -345,3 +345,67 @@ html, body {
 .admin-link i {
     font-size: 1rem;
 }
+
+/* Logout Section */
+.logout-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.current-user-info {
+    text-align: center;
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
+}
+
+.current-user-info p {
+    margin-bottom: 1rem;
+    color: #2c3e50;
+    font-size: 1.1rem;
+}
+
+.current-user-info i {
+    color: #5b95cf;
+    margin-right: 0.5rem;
+}
+
+.logout-btn, .continue-btn {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0.5rem;
+}
+
+.logout-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.logout-btn:hover {
+    background-color: #c82333;
+}
+
+.continue-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.continue-btn:hover {
+    background-color: #218838;
+}
+
+/* Hide elements when user is logged in */
+.login-form.hidden,
+.register-link.hidden,
+.admin-link.hidden {
+    display: none !important;
+}

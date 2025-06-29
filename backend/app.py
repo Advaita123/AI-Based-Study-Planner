@@ -136,3 +136,155 @@ def generate_comprehensive_schedule():
     except Exception as e:
         print(f"Schedule generation error: {str(e)}")
         return jsonify({'error': 'Error generating schedule'}), 500 
+
+@app.route('/api/user_schedule', methods=['POST'])
+def get_user_schedule():
+    try:
+        data = request.json
+        user_email = data.get('user_email', '')
+        
+        if not user_email:
+            return jsonify({'error': 'User email required'}), 400
+        
+        # Get user's schedule from database (you can implement this based on your needs)
+        # For now, return a sample schedule
+        schedule = {
+            'user_email': user_email,
+            'subjects': [
+                {
+                    'name': 'Mathematics',
+                    'difficulty': 'Hard',
+                    'recommended_hours': 40,
+                    'daily_hours': 2.5
+                },
+                {
+                    'name': 'Physics',
+                    'difficulty': 'Medium',
+                    'recommended_hours': 30,
+                    'daily_hours': 2.0
+                },
+                {
+                    'name': 'Chemistry',
+                    'difficulty': 'Easy',
+                    'recommended_hours': 25,
+                    'daily_hours': 1.5
+                }
+            ],
+            'exam_date': '2024-06-15',
+            'total_recommended_hours': 95
+        }
+        
+        return jsonify({'schedule': schedule})
+        
+    except Exception as e:
+        print(f"Error getting user schedule: {str(e)}")
+        return jsonify({'error': 'Error retrieving schedule'}), 500
+
+@app.route('/api/validate_progress', methods=['POST'])
+def validate_progress():
+    try:
+        data = request.json
+        user_email = data.get('user_email', '')
+        subject = data.get('subject', '')
+        hours = data.get('hours', 0)
+        topics = data.get('topics', '')
+        difficulty = data.get('difficulty', '')
+        confidence = data.get('confidence', 0)
+        
+        # Validation checks
+        validation_errors = []
+        
+        # Check for reasonable study hours (max 12 hours per session)
+        if hours > 12:
+            validation_errors.append("Study hours cannot exceed 12 hours per session")
+        
+        # Check for minimum study time (at least 0.5 hours)
+        if hours < 0.5:
+            validation_errors.append("Study time must be at least 0.5 hours")
+        
+        # Check for topic description length
+        if len(topics.strip()) < 10:
+            validation_errors.append("Please provide more detailed description of topics studied")
+        
+        # Check for confidence level validity
+        if confidence < 1 or confidence > 10:
+            validation_errors.append("Confidence level must be between 1 and 10")
+        
+        # Check for suspicious patterns (multiple entries in same day with same subject)
+        # This would require database query in production
+        
+        if validation_errors:
+            return jsonify({
+                'valid': False,
+                'errors': validation_errors
+            }), 400
+        
+        return jsonify({
+            'valid': True,
+            'message': 'Progress data validated successfully'
+        })
+        
+    except Exception as e:
+        print(f"Error validating progress: {str(e)}")
+        return jsonify({'error': 'Error validating progress'}), 500
+
+@app.route('/api/teacher_progress', methods=['POST'])
+def get_teacher_progress():
+    try:
+        data = request.json
+        student_email = data.get('student_email', '')
+        
+        if not student_email:
+            return jsonify({'error': 'Student email required'}), 400
+        
+        # In production, this would query your database
+        # For now, return sample progress data
+        progress_data = {
+            'student_email': student_email,
+            'student_name': student_email.split('@')[0],
+            'total_study_hours': 45.5,
+            'completion_rate': 78,
+            'study_streak': 7,
+            'subjects': [
+                {
+                    'name': 'Mathematics',
+                    'total_hours': 20.5,
+                    'sessions': 8,
+                    'average_confidence': 7.2
+                },
+                {
+                    'name': 'Physics',
+                    'total_hours': 15.0,
+                    'sessions': 6,
+                    'average_confidence': 6.8
+                },
+                {
+                    'name': 'Chemistry',
+                    'total_hours': 10.0,
+                    'sessions': 4,
+                    'average_confidence': 8.1
+                }
+            ],
+            'recent_entries': [
+                {
+                    'date': '2024-01-15',
+                    'subject': 'Mathematics',
+                    'hours': 2.5,
+                    'topics': 'Calculus integration and differentiation',
+                    'confidence': 8
+                },
+                {
+                    'date': '2024-01-14',
+                    'subject': 'Physics',
+                    'hours': 2.0,
+                    'topics': 'Mechanics and Newton\'s laws',
+                    'confidence': 7
+                }
+            ]
+        }
+        
+        return jsonify(progress_data)
+        
+    except Exception as e:
+        print(f"Error getting teacher progress: {str(e)}")
+        return jsonify({'error': 'Error retrieving progress data'}), 500 

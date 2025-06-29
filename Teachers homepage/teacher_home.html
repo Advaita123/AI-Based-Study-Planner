@@ -10,17 +10,16 @@
 </head>
 <body>
 
-
-
 <div class="wrapper">
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="logo">StudyPlanner</div>
         <ul class="nav-links">
             <li><a href="#" class="active"><i class="fas fa-home"></i> Home</a></li>
-            <li><a href="#"><i class="fas fa-info-circle"></i> About Us</a></li>
-            <li><a href="../Create/create_scheduler.html"><i class="fas fa-plus-circle"></i> Create</a></li>
-            <li><a href=../Login/logout><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            <li><a href="../About/about.html"><i class="fas fa-info-circle"></i> About Us</a></li>
+            <li><a href="../Create/new.html"><i class="fas fa-plus-circle"></i> Create</a></li>
+            <li><a href="../Progress/teacher_progress.html"><i class="fas fa-chart-line"></i> Progress</a></li>
+            <li><a href="../Login/logout.html"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
         </ul>
     </nav>
 
@@ -29,52 +28,97 @@
         <!-- Welcome Section  -->
         <div class="welcome-section">
             <h1>Welcome back, <span id="teacher-name">Teacher</span>!</h1>
-            
             <p class="date" id="current-date"></p>
         </div>
 
         <!-- Student Search Section -->
         <div class="search-section">
             <div class="search-container">
-                <input type="text" id="student-id" placeholder="Enter Student ID">
-                <button id="search-student"><i class="fas fa-search"></i></button>
+                <input type="email" id="student-email" placeholder="Enter Student Email">
+                <button id="search-student"><i class="fas fa-search"></i> View Progress</button>
             </div>
         </div>
 
-        <!-- Student Performance Section -->
-        <div class="performance-section" id="performance-section" style="display: none;">
+        <!-- Student Progress Section -->
+        <div class="progress-section" id="progress-section" style="display: none;">
             <div class="student-header">
-                <h2>Student Performance Analysis</h2>
+                <h2><i class="fas fa-user-graduate"></i> Student Progress Analysis</h2>
                 <h3 id="student-name-display"></h3>
             </div>
 
-            <div class="performance-grid">
-                <div class="task-statistics">
-                    <h2>Task Statistics</h2>
-                    <div class="stats-list">
-                        <div class="stat-item">
-                            <span class="label">Tasks Completed</span>
-                            <span class="value" id="tasks-completed">0</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="label">Tasks Left</span>
-                            <span class="value" id="tasks-left">0</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="label">Overall Study Hours</span>
-                            <span class="value" id="study-hours">0</span>
-                        </div>
+            <!-- Progress Overview -->
+            <div class="progress-overview">
+                <div class="overview-card">
+                    <i class="fas fa-clock"></i>
+                    <h3>Total Study Hours</h3>
+                    <p id="total-study-hours">0</p>
+                </div>
+                <div class="overview-card">
+                    <i class="fas fa-percentage"></i>
+                    <h3>Completion Rate</h3>
+                    <p id="completion-rate">0%</p>
+                </div>
+                <div class="overview-card">
+                    <i class="fas fa-fire"></i>
+                    <h3>Study Streak</h3>
+                    <p id="study-streak">0 days</p>
+                </div>
+                <div class="overview-card">
+                    <i class="fas fa-calendar-check"></i>
+                    <h3>Active Sessions</h3>
+                    <p id="active-sessions">0</p>
+                </div>
+            </div>
+
+            <!-- Subject-wise Progress -->
+            <div class="subjects-progress">
+                <h3><i class="fas fa-book"></i> Subject-wise Progress</h3>
+                <div id="subjects-grid" class="subjects-grid">
+                    <!-- Subject cards will be populated here -->
+                </div>
+            </div>
+
+            <!-- Recent Progress Entries -->
+            <div class="recent-progress">
+                <h3><i class="fas fa-history"></i> Recent Study Sessions</h3>
+                <div id="recent-entries" class="recent-entries">
+                    <!-- Recent entries will be populated here -->
+                </div>
+            </div>
+
+            <!-- Teacher Remarks -->
+            <div class="remarks-section">
+                <h3><i class="fas fa-comment"></i> Teacher Remarks</h3>
+                <div class="remarks-container">
+                    <textarea id="teacher-remarks" placeholder="Enter your feedback and remarks for this student..."></textarea>
+                    <button id="save-remarks">
+                        <i class="fas fa-save"></i> Save Remarks
+                    </button>
+                </div>
+            </div>
+
+            <!-- Progress Charts -->
+            <div class="charts-section">
+                <h3><i class="fas fa-chart-bar"></i> Progress Analytics</h3>
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h4>Weekly Study Pattern</h4>
+                        <canvas id="weekly-chart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h4>Subject Performance</h4>
+                        <canvas id="subject-chart"></canvas>
                     </div>
                 </div>
-                <div class="remarks-section">
-                    <h2>Teacher Remarks</h2>
-                    <div class="remarks-container">
-                        <textarea id="teacher-remarks" placeholder="Enter your remarks here..."></textarea>
-                        <button id="save-remarks">
-                            <i class="fas fa-save"></i> Save Remarks
-                        </button>
-                    </div>
-                </div>
+            </div>
+        </div>
+
+        <!-- No Results Message -->
+        <div id="no-results" class="no-results" style="display: none;">
+            <div class="no-results-content">
+                <i class="fas fa-search"></i>
+                <h3>No Student Found</h3>
+                <p>Enter a valid student email to view their progress.</p>
             </div>
         </div>
     </div>
@@ -105,14 +149,9 @@
                 </div>
             </div>
         </div>
-
-        <!--<div class="footer-bottom">
-            <p>&copy; 2024 StudyPlanner. All rights reserved.</p>
-        </div>!-->
-    </div>
-
     </footer>
+</div>
 
-    <script src="teacher_script.js"></script>
+<script src="teacher_progress.js"></script>
 </body>
 </html> 

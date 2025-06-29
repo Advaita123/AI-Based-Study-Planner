@@ -234,3 +234,395 @@ html, body {
         grid-template-columns: 1fr;
     }
 }
+
+/* Progress Section Styles */
+.progress-section {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    margin-top: 2rem;
+    backdrop-filter: blur(6px);
+}
+
+.student-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.student-header h2 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    font-size: 1.8rem;
+}
+
+.student-header h3 {
+    color: #5b95cf;
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+/* Progress Overview */
+.progress-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.overview-card {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 10px;
+    text-align: center;
+    border-left: 4px solid #5b95cf;
+    transition: transform 0.2s ease;
+}
+
+.overview-card:hover {
+    transform: translateY(-2px);
+}
+
+.overview-card i {
+    font-size: 2rem;
+    color: #5b95cf;
+    margin-bottom: 1rem;
+}
+
+.overview-card h3 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+}
+
+.overview-card p {
+    color: #5b95cf;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+/* Subjects Progress */
+.subjects-progress {
+    margin-bottom: 2rem;
+}
+
+.subjects-progress h3 {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.subjects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.subject-card {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
+    transition: transform 0.2s ease;
+}
+
+.subject-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.subject-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.subject-header h4 {
+    color: #2c3e50;
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.confidence-badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.subject-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: #6c757d;
+}
+
+.stat-item i {
+    color: #5b95cf;
+    width: 16px;
+}
+
+/* Recent Progress */
+.recent-progress {
+    margin-bottom: 2rem;
+}
+
+.recent-progress h3 {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.recent-entries {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.entry-card {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 10px;
+    border-left: 4px solid #5b95cf;
+    transition: transform 0.2s ease;
+}
+
+.entry-card:hover {
+    transform: translateX(5px);
+}
+
+.entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.entry-subject {
+    font-weight: bold;
+    color: #2c3e50;
+    font-size: 1.1rem;
+}
+
+.entry-date {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.entry-details {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6c757d;
+}
+
+.detail-item i {
+    color: #5b95cf;
+    width: 16px;
+}
+
+.entry-topics {
+    background-color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    color: #6c757d;
+    line-height: 1.5;
+}
+
+/* Remarks Section */
+.remarks-section {
+    margin-bottom: 2rem;
+}
+
+.remarks-section h3 {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.remarks-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.remarks-container textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    resize: vertical;
+}
+
+.remarks-container button {
+    align-self: flex-start;
+    background-color: #5b95cf;
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.remarks-container button:hover {
+    background-color: #4a7caf;
+}
+
+/* Charts Section */
+.charts-section {
+    margin-bottom: 2rem;
+}
+
+.charts-section h3 {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.charts-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+}
+
+.chart-card {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.chart-card h4 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+/* No Results */
+.no-results {
+    text-align: center;
+    padding: 3rem;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(6px);
+}
+
+.no-results-content i {
+    font-size: 4rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.no-results-content h3 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.no-results-content p {
+    color: #6c757d;
+}
+
+/* Message Styles */
+.message {
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+    text-align: center;
+    font-weight: 500;
+}
+
+.message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.message.info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .progress-overview {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .subjects-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .charts-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .entry-details {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .overview-card {
+        padding: 1rem;
+    }
+    
+    .subject-card {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .progress-overview {
+        grid-template-columns: 1fr;
+    }
+    
+    .subject-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
