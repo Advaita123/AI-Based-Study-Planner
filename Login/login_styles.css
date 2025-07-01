@@ -5,28 +5,26 @@
     font-family: 'Lato', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-
-body {
-    background-color: #EAF4FB;
-    color: #2d3436;
-    
-}
 /* Global Styles */
 html, body {
     height: 100%;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #f4f6f9;
     color: #1e293b;
-    display: flex;
-    flex-direction: column;
+    margin: 0;
+}
+
+body {
+    background-color: #EAF4FB;
+    color: #2d3436;
+    min-height: 100vh;
 }
 
 .wrapper {
     background-color:#D9EAF5;
     background-size: cover;
-    
+    min-height: 100vh;
 }
-
 
 /* Navigation Bar */
 .navbar {
@@ -71,12 +69,11 @@ html, body {
 }
 /* Login Page Specific Styles */
 .login-container {
-    min-height: calc(100vh - 200px);
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 2rem;
-    margin-top: 60px;
+    min-height: calc(100vh - 200px);
 }
 
 .login-box {
@@ -231,9 +228,9 @@ html, body {
     background-color: #5b95cf;
     color: black;
     padding: 2rem 1rem;
-    margin-top: auto;
     backdrop-filter: blur(6px); 
     border-radius: 12px;
+    margin-top: 2rem;
 }
 .footer-content {
     display: flex;

@@ -53,14 +53,69 @@ function updateExamCountdown() {
     }
 }
 
+// Show notification function
+function showNotification(message, type = 'info') {
+    // Remove existing notification
+    const existingNotification = document.getElementById('schedule-notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+    
+    const notification = document.createElement('div');
+    notification.id = 'schedule-notification';
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        z-index: 1000;
+        max-width: 300px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        animation: slideIn 0.3s ease;
+    `;
+    
+    // Set background color based on type
+    switch (type) {
+        case 'success':
+            notification.style.backgroundColor = '#28a745';
+            break;
+        case 'error':
+            notification.style.backgroundColor = '#dc3545';
+            break;
+        case 'warning':
+            notification.style.backgroundColor = '#ffc107';
+            notification.style.color = '#212529';
+            break;
+        default:
+            notification.style.backgroundColor = '#17a2b8';
+    }
+    
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
 // Load user schedule from backend
 async function loadUserSchedule() {
     try {
         if (!currentUser) {
             console.log("No user logged in");
+            showNotification("No user logged in", "error");
             return;
         }
 
+        console.log("Loading schedule for user:", currentUser.email);
+        showNotification("Loading your schedule...", "info");
+        
         const response = await fetch('http://localhost:5000/api/user_schedule', {
             method: 'POST',
             headers: {
@@ -71,20 +126,39 @@ async function loadUserSchedule() {
             })
         });
         
+        
+        console.log("Schedule API response status:", response.status);
+        
         if (response.ok) {
             const data = await response.json();
+            console.log("Schedule API response data:", data);
+            
             userSchedule = data.schedule;
             console.log("User schedule loaded:", userSchedule);
             
-            // Update dashboard with real schedule data
-            updateDashboardWithSchedule();
+            if (userSchedule && userSchedule.subjects && userSchedule.subjects.length > 0) {
+                console.log("Schedule has subjects:", userSchedule.subjects.length);
+                showNotification(`Schedule loaded successfully! Found ${userSchedule.subjects.length} subjects.`, "success");
+                // Update dashboard with real schedule data
+                updateDashboardWithSchedule();
+            } else {
+                console.log("No subjects found in schedule, showing empty state");
+                showNotification("No schedule found. Create one to get started!", "warning");
+                showEmptyScheduleState();
+            }
         } else {
-            console.log("No schedule found for user");
+            console.log("Failed to load schedule, status:", response.status);
+            const errorData = await response.json();
+            console.log("Error data:", errorData);
             userSchedule = null;
+            showNotification("Failed to load schedule. Please try again.", "error");
+            showEmptyScheduleState();
         }
     } catch (error) {
         console.error('Error loading user schedule:', error);
         userSchedule = null;
+        showNotification("Error connecting to server. Please check your connection.", "error");
+        showEmptyScheduleState();
     }
 }
 
@@ -240,6 +314,9 @@ function initializeChatbot() {
             const typingIndicator = addTypingIndicator();
             
             try {
+                console.log('Sending message to chatbot:', message);
+                console.log('API URL:', 'http://localhost:5000/api/chatbot');
+                
                 // Send message to Gemini AI backend
                 const response = await fetch('http://localhost:5000/api/chatbot', {
                     method: 'POST',
@@ -249,7 +326,15 @@ function initializeChatbot() {
                     body: JSON.stringify({ message: message })
                 });
                 
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
+                console.log('Response data:', data);
                 
                 // Remove typing indicator
                 typingIndicator.remove();
@@ -261,7 +346,9 @@ function initializeChatbot() {
                 }
                 
             } catch (error) {
-                console.error('Chatbot error:', error);
+                console.error('Chatbot error details:', error);
+                console.error('Error name:', error.name);
+                console.error('Error message:', error.message);
                 typingIndicator.remove();
                 addMessage("I'm having trouble connecting right now. Please check your internet connection and try again.");
             }
@@ -291,11 +378,49 @@ function checkAuthAndInitialize() {
             updateExamCountdown();
             initializeDashboard();
             initializeChatbot();
+            
+            // Add manual refresh button for debugging
+            addRefreshButton();
         } else {
             // Redirect to login if not authenticated
             window.location.href = '../Login/login.html';
         }
     });
+}
+
+// Add manual refresh button for debugging
+function addRefreshButton() {
+    // Check if button already exists
+    if (document.getElementById('refresh-schedule-btn')) {
+        return;
+    }
+    
+    const header = document.querySelector('.header');
+    if (header) {
+        const refreshBtn = document.createElement('button');
+        refreshBtn.id = 'refresh-schedule-btn';
+        refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Schedule';
+        refreshBtn.style.cssText = `
+            background: #5b95cf;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 14px;
+        `;
+        refreshBtn.onclick = function() {
+            console.log('Manual schedule refresh requested');
+            loadUserSchedule();
+        };
+        
+        // Insert after the student name
+        const studentName = document.getElementById('student-name');
+        if (studentName && studentName.parentNode) {
+            studentName.parentNode.insertBefore(refreshBtn, studentName.nextSibling);
+        }
+    }
 }
 
 // Initialize everything when the page loads
