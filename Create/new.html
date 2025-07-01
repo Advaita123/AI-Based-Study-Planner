@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StudyPlanner - Create Your Schedule</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="create_scheduler.css">
     
     <!-- Firebase SDK -->
@@ -28,7 +29,7 @@
 
         <!-- Form Container -->
         <div class="form-container">
-            <form id="scheduler-form" onsubmit="handleSubmit(event)">
+            <form id="scheduler-form">
                 <!-- Step 1: Number of Subjects -->
                 <div class="form-section">
                     <h2>Step 1: Number of Subjects</h2>
@@ -430,6 +431,8 @@
             const hours = parseInt(document.getElementById("weekend-hours").value);
             document.getElementById("weekend-hours-error").style.display = (hours < 1 || hours > 12 || isNaN(hours)) ? "block" : "none";
         });
+
+        document.getElementById('scheduler-form').addEventListener('submit', handleSubmit);
     </script>
 </body>
 </html>

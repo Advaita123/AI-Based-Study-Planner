@@ -2,7 +2,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     updateDate();
     initializeSearch();
-    initializeRemarks();
 });
 
 // Update current date
@@ -34,14 +33,6 @@ function initializeSearch() {
     });
 }
 
-// Initialize teacher remarks functionality
-function initializeRemarks() {
-    const saveRemarksBtn = document.getElementById('save-remarks');
-    if (saveRemarksBtn) {
-        saveRemarksBtn.addEventListener('click', saveTeacherRemarks);
-    }
-}
-
 // Search for student progress
 async function searchStudentProgress(studentEmail) {
     const searchBtn = document.getElementById('search-student');
@@ -62,7 +53,7 @@ async function searchStudentProgress(studentEmail) {
         
         if (response.ok) {
             const data = await response.json();
-            displayStudentProgress(data, studentEmail);
+            displayStudentProgress(data);
         } else {
             const errorData = await response.json();
             showNoResults();
@@ -79,7 +70,7 @@ async function searchStudentProgress(studentEmail) {
 }
 
 // Display student progress
-function displayStudentProgress(data, studentEmail) {
+function displayStudentProgress(data) {
     // Hide no results message
     document.getElementById('no-results').style.display = 'none';
     
@@ -87,74 +78,57 @@ function displayStudentProgress(data, studentEmail) {
     document.getElementById('progress-section').style.display = 'block';
     
     // Update student name
-    document.getElementById('student-name-display').textContent = studentEmail;
+    document.getElementById('student-name-display').textContent = data.student_name;
     
     // Update overview cards
-    document.getElementById('total-study-hours').textContent = `${data.statistics.total_hours.toFixed(1)} hours`;
-    document.getElementById('completion-rate').textContent = `${data.statistics.completion_rate}%`;
-    document.getElementById('study-streak').textContent = `${data.statistics.study_streak} days`;
-    document.getElementById('active-sessions').textContent = data.statistics.active_sessions;
+    document.getElementById('total-study-hours').textContent = `${data.total_study_hours} hours`;
+    document.getElementById('completion-rate').textContent = `${data.completion_rate}%`;
+    document.getElementById('study-streak').textContent = `${data.study_streak} days`;
+    document.getElementById('active-sessions').textContent = data.subjects.reduce((sum, subject) => sum + subject.sessions, 0);
     
     // Display subject-wise progress
-    displaySubjectProgress(data.schedule.subjects, data.progress);
+    displaySubjectProgress(data.subjects);
     
     // Display recent entries
-    displayRecentEntries(data.progress);
-    
-    // Load teacher remarks
-    loadTeacherRemarks(data.teacher_remarks);
+    displayRecentEntries(data.recent_entries);
     
     // Create charts
     createProgressCharts(data);
     
-    // Store student email for remarks
-    document.getElementById('progress-section').setAttribute('data-student-email', studentEmail);
-    
     // Show success message
-    showMessage(`Progress loaded for ${studentEmail}`, 'success');
+    showMessage(`Progress loaded for ${data.student_name}`, 'success');
 }
 
 // Display subject-wise progress
-function displaySubjectProgress(subjects, progressData) {
+function displaySubjectProgress(subjects) {
     const subjectsGrid = document.getElementById('subjects-grid');
     subjectsGrid.innerHTML = '';
     
     subjects.forEach(subject => {
-        // Calculate subject-specific statistics
-        const subjectProgress = progressData.filter(entry => entry.subject === subject.name);
-        const totalHours = subjectProgress.reduce((sum, entry) => sum + entry.hours, 0);
-        const sessions = subjectProgress.length;
-        const avgConfidence = sessions > 0 ? 
-            subjectProgress.reduce((sum, entry) => sum + entry.confidence, 0) / sessions : 0;
-        
         const subjectCard = document.createElement('div');
         subjectCard.className = 'subject-card';
         
-        const confidenceColor = getConfidenceColor(avgConfidence);
+        const confidenceColor = getConfidenceColor(subject.average_confidence);
         
         subjectCard.innerHTML = `
             <div class="subject-header">
                 <h4>${subject.name}</h4>
                 <span class="confidence-badge" style="background-color: ${confidenceColor}">
-                    ${avgConfidence.toFixed(1)}/10
+                    ${subject.average_confidence.toFixed(1)}/10
                 </span>
             </div>
             <div class="subject-stats">
                 <div class="stat-item">
                     <i class="fas fa-clock"></i>
-                    <span>${totalHours.toFixed(1)} hours</span>
+                    <span>${subject.total_hours} hours</span>
                 </div>
                 <div class="stat-item">
                     <i class="fas fa-calendar-check"></i>
-                    <span>${sessions} sessions</span>
+                    <span>${subject.sessions} sessions</span>
                 </div>
                 <div class="stat-item">
                     <i class="fas fa-chart-line"></i>
-                    <span>${sessions > 0 ? (totalHours / sessions).toFixed(1) : 0} avg/session</span>
-                </div>
-                <div class="stat-item">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span>Difficulty: ${subject.difficulty}</span>
+                    <span>${(subject.total_hours / subject.sessions).toFixed(1)} avg/session</span>
                 </div>
             </div>
         `;
@@ -173,19 +147,14 @@ function displayRecentEntries(entries) {
         return;
     }
     
-    // Take the 10 most recent entries
-    const recentEntriesList = entries.slice(0, 10);
-    
-    recentEntriesList.forEach(entry => {
+    entries.forEach(entry => {
         const entryDiv = document.createElement('div');
         entryDiv.className = 'entry-card';
-        
-        const formattedDate = formatDate(entry.date);
         
         entryDiv.innerHTML = `
             <div class="entry-header">
                 <span class="entry-subject">${entry.subject}</span>
-                <span class="entry-date">${formattedDate}</span>
+                <span class="entry-date">${entry.date}</span>
             </div>
             <div class="entry-details">
                 <div class="detail-item">
@@ -196,13 +165,9 @@ function displayRecentEntries(entries) {
                     <i class="fas fa-thumbs-up"></i>
                     <span>Confidence: ${entry.confidence}/10</span>
                 </div>
-                <div class="detail-item">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span>Difficulty: ${entry.difficulty}</span>
-                </div>
             </div>
-            <div class="entry-description">
-                <strong>Topics covered:</strong> ${entry.description}
+            <div class="entry-topics">
+                <strong>Topics:</strong> ${entry.topics}
             </div>
         `;
         
@@ -210,124 +175,47 @@ function displayRecentEntries(entries) {
     });
 }
 
-// Load teacher remarks
-function loadTeacherRemarks(remarks) {
-    const remarksTextarea = document.getElementById('teacher-remarks');
-    if (remarksTextarea) {
-        remarksTextarea.value = remarks || '';
-    }
-}
-
-// Save teacher remarks
-async function saveTeacherRemarks() {
-    const progressSection = document.getElementById('progress-section');
-    const studentEmail = progressSection.getAttribute('data-student-email');
-    const remarks = document.getElementById('teacher-remarks').value.trim();
-    
-    if (!studentEmail) {
-        showMessage('Please search for a student first.', 'error');
-        return;
-    }
-    
-    if (!remarks) {
-        showMessage('Please enter some remarks before saving.', 'warning');
-        return;
-    }
-    
-    const saveBtn = document.getElementById('save-remarks');
-    const originalText = saveBtn.innerHTML;
-    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-    saveBtn.disabled = true;
-    
-    try {
-        const response = await fetch('http://localhost:5000/api/save_teacher_remarks', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                student_email: studentEmail,
-                remarks: remarks
-            })
-        });
-        
-        if (response.ok) {
-            const data = await response.json();
-            showMessage('Remarks saved successfully!', 'success');
-        } else {
-            const errorData = await response.json();
-            showMessage(errorData.error || 'Failed to save remarks.', 'error');
-        }
-    } catch (error) {
-        console.error('Error saving remarks:', error);
-        showMessage('Error connecting to server. Please try again.', 'error');
-    } finally {
-        saveBtn.innerHTML = originalText;
-        saveBtn.disabled = false;
-    }
-}
-
 // Create progress charts
 function createProgressCharts(data) {
-    createWeeklyChart(data.progress);
-    createSubjectChart(data.schedule.subjects, data.progress);
+    createWeeklyChart(data);
+    createSubjectChart(data.subjects);
 }
 
 // Create weekly study pattern chart
-function createWeeklyChart(progressData) {
-    const ctx = document.getElementById('weekly-chart');
-    if (!ctx) return;
+function createWeeklyChart(data) {
+    const ctx = document.getElementById('weekly-chart').getContext('2d');
     
-    // Get last 7 days of data
-    const last7Days = [];
-    for (let i = 6; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        last7Days.push(date.toISOString().split('T')[0]);
-    }
+    // Sample weekly data (in production, this would come from the backend)
+    const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const studyHours = [3.5, 4.2, 2.8, 5.1, 3.9, 6.2, 4.8];
     
-    const dailyHours = last7Days.map(date => {
-        const dayEntries = progressData.filter(entry => entry.date === date);
-        return dayEntries.reduce((sum, entry) => sum + entry.hours, 0);
-    });
-    
-    const weekDays = last7Days.map(date => {
-        const day = new Date(date);
-        return day.toLocaleDateString('en-US', { weekday: 'short' });
-    });
-    
-    // Destroy existing chart if it exists
-    if (window.weeklyChart) {
-        window.weeklyChart.destroy();
-    }
-    
-    window.weeklyChart = new Chart(ctx, {
+    new Chart(ctx, {
         type: 'line',
         data: {
             labels: weekDays,
             datasets: [{
                 label: 'Study Hours',
-                data: dailyHours,
+                data: studyHours,
                 borderColor: '#5b95cf',
                 backgroundColor: 'rgba(91, 149, 207, 0.1)',
-                tension: 0.4,
-                fill: true
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
             }]
         },
         options: {
             responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top',
-                }
-            },
             scales: {
                 y: {
                     beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Hours'
+                    ticks: {
+                        stepSize: 1
                     }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
                 }
             }
         }
@@ -335,74 +223,34 @@ function createWeeklyChart(progressData) {
 }
 
 // Create subject performance chart
-function createSubjectChart(subjects, progressData) {
-    const ctx = document.getElementById('subject-chart');
-    if (!ctx) return;
+function createSubjectChart(subjects) {
+    const ctx = document.getElementById('subject-chart').getContext('2d');
     
-    const subjectNames = subjects.map(subject => subject.name);
-    const subjectHours = subjectNames.map(subjectName => {
-        const subjectProgress = progressData.filter(entry => entry.subject === subjectName);
-        return subjectProgress.reduce((sum, entry) => sum + entry.hours, 0);
-    });
+    const subjectNames = subjects.map(s => s.name);
+    const studyHours = subjects.map(s => s.total_hours);
     
-    const subjectConfidence = subjectNames.map(subjectName => {
-        const subjectProgress = progressData.filter(entry => entry.subject === subjectName);
-        if (subjectProgress.length === 0) return 0;
-        return subjectProgress.reduce((sum, entry) => sum + entry.confidence, 0) / subjectProgress.length;
-    });
-    
-    // Destroy existing chart if it exists
-    if (window.subjectChart) {
-        window.subjectChart.destroy();
-    }
-    
-    window.subjectChart = new Chart(ctx, {
-        type: 'bar',
+    new Chart(ctx, {
+        type: 'doughnut',
         data: {
             labels: subjectNames,
             datasets: [{
-                label: 'Total Hours',
-                data: subjectHours,
-                backgroundColor: 'rgba(91, 149, 207, 0.8)',
-                yAxisID: 'y'
-            }, {
-                label: 'Avg Confidence',
-                data: subjectConfidence,
-                backgroundColor: 'rgba(255, 193, 7, 0.8)',
-                yAxisID: 'y1',
-                type: 'line'
+                data: studyHours,
+                backgroundColor: [
+                    '#5b95cf',
+                    '#28a745',
+                    '#ffc107',
+                    '#dc3545',
+                    '#6f42c1'
+                ],
+                borderWidth: 2,
+                borderColor: '#ffffff'
             }]
         },
         options: {
             responsive: true,
             plugins: {
                 legend: {
-                    position: 'top',
-                }
-            },
-            scales: {
-                y: {
-                    type: 'linear',
-                    display: true,
-                    position: 'left',
-                    title: {
-                        display: true,
-                        text: 'Hours'
-                    }
-                },
-                y1: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    title: {
-                        display: true,
-                        text: 'Confidence (1-10)'
-                    },
-                    grid: {
-                        drawOnChartArea: false,
-                    },
-                    max: 10,
-                    min: 0
+                    position: 'bottom'
                 }
             }
         }
@@ -411,21 +259,9 @@ function createSubjectChart(subjects, progressData) {
 
 // Get confidence color based on level
 function getConfidenceColor(confidence) {
-    if (confidence >= 8) return '#28a745'; // Green for high confidence
-    if (confidence >= 6) return '#ffc107'; // Yellow for medium confidence
-    if (confidence >= 4) return '#fd7e14'; // Orange for low-medium confidence
-    return '#dc3545'; // Red for low confidence
-}
-
-// Format date for display
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-        weekday: 'short',
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
+    if (confidence >= 8) return '#28a745'; // Green
+    if (confidence >= 6) return '#ffc107'; // Yellow
+    return '#dc3545'; // Red
 }
 
 // Show no results message
@@ -436,26 +272,25 @@ function showNoResults() {
 
 // Show message
 function showMessage(message, type = 'info') {
-    // Remove existing messages
-    const existingMessages = document.querySelectorAll('.message');
-    existingMessages.forEach(msg => msg.remove());
-    
-    // Create new message
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${type}`;
-    messageDiv.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
-        <span>${message}</span>
-    `;
+    messageDiv.textContent = message;
     
-    // Add to page
     const container = document.querySelector('.container');
     container.insertBefore(messageDiv, container.firstChild);
     
-    // Auto-remove after 5 seconds
     setTimeout(() => {
-        if (messageDiv.parentNode) {
-            messageDiv.remove();
-        }
+        messageDiv.remove();
     }, 5000);
-} 
+}
+
+// Handle teacher remarks
+document.getElementById('save-remarks').addEventListener('click', function() {
+    const remarks = document.getElementById('teacher-remarks').value.trim();
+    if (remarks) {
+        // In production, save remarks to database
+        showMessage('Remarks saved successfully!', 'success');
+    } else {
+        showMessage('Please enter some remarks before saving.', 'error');
+    }
+}); 

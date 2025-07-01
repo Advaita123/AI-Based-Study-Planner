@@ -5,40 +5,34 @@
     font-family: 'Lato', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+
+body {
+    background-color: #EAF4FB;
+    color: #2d3436;
+    
+}
 /* Global Styles */
 html, body {
     height: 100%;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #f4f6f9;
     color: #1e293b;
+    display: flex;
+    flex-direction: column;
     margin: 0;
 }
-.wrapper {
-    background-color:#EAF4FB;
-}
 
-body {
-    background-color: #EAF4FB;
-    color: #2d3436;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
+
+
 
 .wrapper {
-    background-color:#EAF4FB;
+    
+    background-color:#D9EAF5;
     background-size: cover;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
+    flex:1;
+    
 }
 
-/* Main content area */
-.main-content {
-    flex: 1;
-    padding: 2rem 0;
-}
 
 /* Navigation Bar */
 .navbar {
@@ -48,11 +42,11 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    
     width: 100%;
     top: 0;
     z-index: 1000;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
-    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 12px;
 }
 
 .logo {
@@ -81,132 +75,111 @@ body {
     color:rgb(236, 238, 239);
 
 }
-
 .form-container {
-    background-color: white;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    margin: 2rem auto;
-    max-width: 800px;
-    width: 100%;
-}
-
-.form-section {
-    margin-bottom: 25px;
-}
-
-.form-section h2 {
-    font-size: 1.6em;
-    margin-bottom: 15px;
-    color: 	#5b95cf;
-    border-bottom: 2px solid #e5e7eb;
-    padding-bottom: 5px;
-}
-
-.form-group {
-    margin-bottom: 20px;
-    position: relative;
-}
-
-.form-group label {
-    display: block;
-    font-weight: 500;
-    margin-bottom: 8px;
-    font-size: 1em;
-}
-
-.form-group input, .form-group select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    font-size: 1em;
-    transition: border-color 0.2s;
-}
-
-.form-group input:focus, .form-group select:focus {
-    outline: none;
-    border-color: 	#5b95cf;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.form-group input:invalid:not(:placeholder-shown) {
-    border-color: #ef4444;
-}
-
-.form-group .error {
-    color: #ef4444;
-    font-size: 0.85em;
-    margin-top: 5px;
-    display: none;
-}
-
-.subject-entry {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
-    gap: 15px;
-    margin-bottom: 15px;
-}
-
-.study-hours-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-}
-
-.submit-btn, .action-btn {
-    background-color: 	#5b95cf;
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 6px;
-    font-size: 1em;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: background-color 0.2s;
-}
-
-.action-btn {
-    background-color: 	#5b95cf;
-    margin-left: 10px;
-    display: inline-flex;
-}
-
-.submit-btn:hover, .action-btn:hover {
-    background-color: #059669;
-}
-
-.action-btn:hover {
-    background-color: 	#5b95cf;
-}
-
-.tooltip {
-    position: relative;
-}
-
-.tooltip .tooltip-text {
-    visibility: hidden;
-    background-color: #4b5563;
-    color: white;
-    text-align: center;
-    border-radius: 4px;
-    padding: 5px 10px;
-    position: absolute;
-    z-index: 1;
-    bottom: 125%;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 0.85em;
-    width: 200px;
-}
-
-.tooltip:hover .tooltip-text {
-    visibility: visible;
-}
-
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            
+        }
+        .form-section {
+            margin-bottom: 25px;
+        }
+        .form-section h2 {
+            font-size: 1.6em;
+            margin-bottom: 15px;
+            color: 	#5b95cf;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 5px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: 	#5b95cf;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .form-group input:invalid:not(:placeholder-shown) {
+            border-color: #ef4444;
+        }
+        .form-group .error {
+            color: #ef4444;
+            font-size: 0.85em;
+            margin-top: 5px;
+            display: none;
+        }
+        .subject-entry {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .study-hours-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .submit-btn, .action-btn {
+            background-color: 	#5b95cf;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s;
+        }
+        .action-btn {
+            background-color: 	#5b95cf;
+            margin-left: 10px;
+            display: inline-flex;
+        }
+        .submit-btn:hover, .action-btn:hover {
+            background-color: #059669;
+        }
+        .action-btn:hover {
+            background-color: 	#5b95cf;
+        }
+        .tooltip {
+            position: relative;
+        }
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            background-color: #4b5563;
+            color: white;
+            text-align: center;
+            border-radius: 4px;
+            padding: 5px 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.85em;
+            width: 200px;
+        }
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+        }
 /* Subject Entry Styles */
 .subject-entry {
     background-color: #ffffff;
@@ -250,7 +223,6 @@ body {
     background-color: white;
     margin-top:10px;
 }
-
 .marks-input {
     width: 100%;
     padding: 0.8rem;
@@ -271,34 +243,28 @@ body {
     background-color: #5b95cf;
     color: black;
     padding: 2rem 1rem;
+    margin-top: auto;
     backdrop-filter: blur(6px); 
     border-radius: 12px;
-    margin-top: auto;
-    width: 100%;
 }
-
 .footer-content {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-around;
     gap: 2rem;
 }
-
 .footer-section h3 {
     margin-bottom: 1rem;
 }
-
 .footer-section p, 
 .footer-section a {
     color: #0c0d0d;
     font-size: 0.95rem;
     text-decoration: none;
 }
-
 .footer-section a:hover {
     text-decoration: underline;
 }
-
 .social-links a {
     margin-right: 0.75rem;
     font-size: 1.25rem;
@@ -314,6 +280,8 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+
 
 /* Schedule Results Styling */
 .results-section {
@@ -525,31 +493,4 @@ body {
     .subject-card {
         padding: 1rem;
     }
-}
-
-/* Schedule Actions */
-.schedule-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 2px solid #e9ecef;
-}
-
-.schedule-actions .action-btn {
-    padding: 12px 24px;
-    font-size: 1rem;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-}
-
-.schedule-actions .action-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-/* Prevent form reset */
-#scheduler-form {
-    /* Prevent form from being reset automatically */
 }

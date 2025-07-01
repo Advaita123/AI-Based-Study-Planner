@@ -232,12 +232,12 @@ def generate_comprehensive_schedule():
             if ml_model is not None:
                 try:
                     features = np.array([[difficulty_num, subject['marks'], days_left]])
-                    recommended_hours = ml_model.predict(features)[0]
+                    recommended_hours = ml_model.predict(features)[0]*5
                 except Exception as e:
                     print(f"ML prediction failed, using fallback: {e}")
-                    recommended_hours = fallback_prediction(subject['difficulty'], subject['marks'], days_left)
+                    recommended_hours = fallback_prediction(subject['difficulty'], subject['marks'], days_left)*5
             else:
-                recommended_hours = fallback_prediction(subject['difficulty'], subject['marks'], days_left)
+                recommended_hours = fallback_prediction(subject['difficulty'], subject['marks'], days_left)*5
             
             subject_schedules.append({
                 'name': subject['name'],
