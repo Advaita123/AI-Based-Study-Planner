@@ -50,41 +50,9 @@ document.getElementById('num-subjects').addEventListener('change', function(e) {
     }
 });
 
-// Handle form submission
-document.getElementById('scheduler-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Get form data
-    const formData = {
-        subjects: [],
-        examDate: document.getElementById('exam-date').value,
-        studyHours: document.getElementById('study-hours').value,
-        studyHabits: document.getElementById('study-habits').value
-    };
-
-    // Get subject data
-    document.querySelectorAll('.subject-entry').forEach(entry => {
-        formData.subjects.push({
-            name: entry.querySelector('.subject-name').value,
-            difficulty: entry.querySelector('.difficulty-select').value,
-            hours: entry.querySelector('.hours-input').value
-        });
-    });
-
-    // Generate study plan using AI model
-    const studyPlan = generateStudyPlan(formData);
-    
-    // Save study plan to localStorage
-    localStorage.setItem('studyPlan', JSON.stringify(studyPlan));
-    
-    // Redirect to study plan page
-    window.location.href = 'study_plan.html';
-});
-
 // Function to generate study plan (placeholder for AI model integration)
 function generateStudyPlan(formData) {
-    // This is a placeholder function that creates a sample study plan
-    // In a real application, this would use the AI model we created
+    
     const today = new Date();
     const examDate = new Date(formData.examDate);
     const totalDays = Math.ceil((examDate - today) / (1000 * 60 * 60 * 24));

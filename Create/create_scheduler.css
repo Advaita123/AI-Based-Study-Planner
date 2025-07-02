@@ -30,9 +30,10 @@ html, body {
     background-color:#D9EAF5;
     background-size: cover;
     flex:1;
+    display: flex;
+    flex-direction: column;
     
 }
-
 
 /* Navigation Bar */
 .navbar {
@@ -265,6 +266,9 @@ html, body {
 .footer-section a:hover {
     text-decoration: underline;
 }
+footer.footer {
+    margin-top: auto;
+}
 .social-links a {
     margin-right: 0.75rem;
     font-size: 1.25rem;
@@ -280,7 +284,6 @@ html, body {
         grid-template-columns: 1fr;
     }
 }
-
 
 
 /* Schedule Results Styling */
