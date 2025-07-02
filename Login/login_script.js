@@ -118,15 +118,6 @@ function initializeFormHandlers() {
         console.error("Login form not found!");
     }
     
-    // Handle register link click
-    const registerLink = document.getElementById("register-link");
-    if (registerLink) {
-        registerLink.addEventListener("click", function(event) {
-            event.preventDefault();
-            showMessage("Registration will be available soon!", "info");
-        });
-    }
-    
     // Handle forgot password
     const forgotPasswordLink = document.querySelector(".forgot-password");
     if (forgotPasswordLink) {

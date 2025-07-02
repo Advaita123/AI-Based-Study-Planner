@@ -323,12 +323,13 @@ document.getElementById('add-user-form').addEventListener('submit', async functi
         const user = userCredential.user;
         
         // Add user data to Firestore
-        await db.collection('users').doc(user.uid).set({
-            name: name,
-            email: email,
-            role: role,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        await db.collection('users').doc(user.uid).set(  {
+           "name": "Admin",
+           "email": "advaitaa101@gmail.com",
+           "role": "admin"
         });
+      
+
         
         showMessage(`User ${name} added successfully!`, 'success');
         event.target.reset();
@@ -357,4 +358,4 @@ document.getElementById('add-user-form').addEventListener('submit', async functi
 });
 </script>
 </body>
-</html> 
+</html>

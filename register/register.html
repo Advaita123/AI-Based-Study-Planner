@@ -3,17 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyPlanner - Login</title>
+    <title>StudyPlanner - Register</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="login_styles.css">
+    <link rel="stylesheet" href="../Login/login_styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
-
 <body>
 <div class="wrapper">
     <!-- Navigation Bar -->
@@ -23,68 +21,47 @@
             <li><a href="../Homepage/student_home.html"><i class="fas fa-home"></i> Home</a></li>
             <li><a href="../About/about.html"><i class="fas fa-info-circle"></i> About Us</a></li>
             <li><a href="../Create/create_scheduler.html"><i class="fas fa-plus-circle"></i> Create</a></li>
-            <li><a href="login.html" class="active"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+            <li><a href="../Login/login.html"><i class="fas fa-sign-in-alt"></i> Login</a></li>
         </ul>
     </nav>
-
-    <!-- Login Container -->
+    <!-- Registration Container -->
     <div class="login-container">
         <div class="login-box">
-            <h2>Welcome Back!</h2>
-            <p class="subtitle">Please login to your account</p>
-            
-            <form id="login-form" class="login-form">
+            <h2>Create Your Account</h2>
+            <p class="subtitle">Register to access StudyScheduler</p>
+            <form id="register-form" class="login-form">
+                <div class="form-group">
+                    <label for="name"><i class="fas fa-user"></i> Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="age"><i class="fas fa-calendar"></i> Age</label>
+                    <input type="number" id="age" name="age" min="10" max="100" required>
+                </div>
                 <div class="form-group">
                     <label for="email"><i class="fas fa-envelope"></i> Email</label>
                     <input type="email" id="email" name="email" required>
                 </div>
-                
                 <div class="form-group">
                     <label for="password"><i class="fas fa-lock"></i> Password</label>
-                    <input type="password" id="password" name="password" required>
+                    <input type="password" id="password" name="password" required minlength="6">
                 </div>
-                
-                <div class="form-group remember-forgot">
-                    <label class="remember">
-                        <input type="checkbox" id="remember" name="remember">
-                        Remember me
-                    </label>
-                    <a href="#" class="forgot-password">Forgot Password?</a>
+                <div class="form-group">
+                    <label for="confirm-password"><i class="fas fa-lock"></i> Confirm Password</label>
+                    <input type="password" id="confirm-password" name="confirm-password" required minlength="6">
                 </div>
-                
                 <div class="form-group">
                     <button type="submit" class="login-btn">
-                        <i class="fas fa-sign-in-alt"></i> Login
+                        <i class="fas fa-user-plus"></i> Register
                     </button>
                 </div>
-                
-                <div class="form-group role-selector">
-                    <label>Login as:</label>
-                    <div class="role-buttons">
-                        <button type="button" class="role-btn active" data-role="student">
-                            <i class="fas fa-user-graduate"></i> Student
-                        </button>
-                        <button type="button" class="role-btn" data-role="teacher">
-                            <i class="fas fa-chalkboard-teacher"></i> Teacher
-                        </button>
-                    </div>
-                </div>
             </form>
-            
             <div class="register-link">
-                <p>Don't have an account? <a href="../register/register.html" id="register-link">Register here</a></p>
+                <p>Already have an account? <a href="../Login/login.html">Login here</a></p>
             </div>
-            
-            <!-- Admin Access Link 
-            <div class="admin-link">
-                <p><a href="admin.html" id="admin-link"><i class="fas fa-user-cog"></i> Admin Panel</a></p>
-            </div>
-            -->
-            <!-- Error/Success Messages -->
             <div id="message" class="message" style="display: none;"></div>
         </div>
     </div>
-
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
@@ -111,13 +88,10 @@
                 </div>
             </div>
         </div>
-       <div class="footer-bottom">
-            
-        </div>
-    </div>
-</div>
+        <div class="footer-bottom"></div>
     </footer>
-
-    <script src="login_script.js"></script>
+</div>
+<script src="firebase-config.js"></script>
+<script src="register_script.js"></script>
 </body>
 </html> 

@@ -254,8 +254,10 @@
                     exam_date: examDate,
                     weekday_hours: weekdayHours,
                     weekend_hours: weekendHours,
-                    user_email: user.email  // Add user email
-                })
+                    user_email: user.email 
+                   
+                }),
+                mode: 'cors'
             })
             .then(res => res.json())
             .then(data => {
