@@ -334,7 +334,7 @@ html, body {
     }
 }
 
-/* Admin Link Styles */
+/* Admin Link Styles
 .admin-link {
     text-align: center;
     margin-top: 1rem;
@@ -362,7 +362,7 @@ html, body {
 
 .admin-link i {
     font-size: 1rem;
-}
+} */
 
 /* Logout Section */
 .logout-section {

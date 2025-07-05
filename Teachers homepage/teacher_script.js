@@ -5,39 +5,6 @@ function updateDate() {
     document.getElementById('current-date').textContent = date.toLocaleDateString('en-US', options);
 }
 
-// Sample student data (in a real application, this would come from a database)
-const studentDatabase = {
-    'STU001': {
-        name: 'Student name: Advaita',
-        progress: {
-            mathematics: 80,
-            physics: 65,
-            chemistry: 90,
-            biology: 75
-        },
-        tasks: {
-            completed: 15,
-            left: 5,
-            studyHours: 45
-        },
-        remarks: ''
-    },
-    'STU002': {
-        name: 'John Doe',
-        progress: {
-            mathematics: 70,
-            physics: 85,
-            chemistry: 60,
-            biology: 80
-        },
-        tasks: {
-            completed: 12,
-            left: 8,
-            studyHours: 40
-        },
-        remarks: ''
-    }
-};
 
 // Initialize progress chart
 function initializeProgressChart(subjectData) {

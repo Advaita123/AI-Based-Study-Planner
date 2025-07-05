@@ -21,6 +21,7 @@ html, body {
     flex-direction: column;
 }
 
+
 .wrapper {
     
     background-color:#D9EAF5;
@@ -30,7 +31,6 @@ html, body {
     flex-direction: column;
     
 }
-
 
 /* Navigation Bar */
 .navbar {
@@ -130,6 +130,8 @@ html, body {
     border-radius: 1rem;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
     margin-top: 2rem;
+    max-width: 1200px;
+    
 }
 .student-header h2 {
     font-size: 1.5rem;
@@ -204,9 +206,6 @@ html, body {
     margin-top: auto;
     backdrop-filter: blur(6px); 
     border-radius: 12px;
-}
-footer.footer {
-    margin-top: auto;
 }
 .footer-content {
     display: flex;
@@ -403,6 +402,7 @@ footer.footer {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    width:100%;
 }
 
 .entry-card {
@@ -459,6 +459,16 @@ footer.footer {
     border-radius: 8px;
     color: #6c757d;
     line-height: 1.5;
+}
+
+.entry-notes {
+    background-color: #f8f9fa;
+    padding: 0.8rem;
+    border-radius: 6px;
+    color: #6c757d;
+    line-height: 1.4;
+    margin-top: 0.5rem;
+    font-style: italic;
 }
 
 /* Remarks Section */
@@ -567,6 +577,25 @@ footer.footer {
     color: #6c757d;
 }
 
+.no-entries {
+    text-align: center;
+    padding: 2rem;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    border: 2px dashed #dee2e6;
+}
+
+.no-entries i {
+    font-size: 3rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.no-entries p {
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
 /* Message Styles */
 .message {
     padding: 1rem;
@@ -632,4 +661,21 @@ footer.footer {
         align-items: flex-start;
         gap: 0.5rem;
     }
+}
+
+/* Make overview cards, subject cards, and entry cards wider */
+.overview-card, .subject-card, .entry-card {
+    min-width: 350px;
+    width: 90%;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+}
+/* If using flex or grid, ensure container allows wrapping and wide cards */
+.progress-overview, .subjects-grid, .recent-entries {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
 }

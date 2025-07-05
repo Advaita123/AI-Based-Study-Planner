@@ -3,10 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyPlanner - Teacher Dashboard</title>
+    <title>StudyPlanner - Teacher Progress</title>
     <link rel="stylesheet" href="tHome.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -15,10 +19,10 @@
     <nav class="navbar">
         <div class="logo">StudyPlanner</div>
         <ul class="nav-links">
-            <li><a href="#" class="active"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="teacher_home.html"><i class="fas fa-home"></i> Home</a></li>
             <li><a href="../About/about.html"><i class="fas fa-info-circle"></i> About Us</a></li>
             <li><a href="../Create/new.html"><i class="fas fa-plus-circle"></i> Create</a></li>
-            <li><a href="../Progress/teacher_progress.html"><i class="fas fa-chart-line"></i> Progress</a></li>
+            <li><a href="#" class="active"><i class="fas fa-chart-line"></i> Progress</a></li>
             <li><a href="../Login/logout.html"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
         </ul>
     </nav>
@@ -27,7 +31,7 @@
     <div class="container">
         <!-- Welcome Section  -->
         <div class="welcome-section">
-            <h1>Welcome back, <span id="teacher-name">Teacher</span>!</h1>
+            <h1>Student Progress Tracking</h1>
             <p class="date" id="current-date"></p>
         </div>
 
@@ -42,40 +46,8 @@
         <!-- Student Progress Section -->
         <div class="progress-section" id="progress-section" style="display: none;">
             <div class="student-header">
-                <h2><i class="fas fa-user-graduate"></i> Student Progress Analysis</h2>
+                <h2><i class="fas fa-user-graduate"></i> Student Progress</h2>
                 <h3 id="student-name-display"></h3>
-            </div>
-
-            <!-- Progress Overview -->
-            <div class="progress-overview">
-                <div class="overview-card">
-                    <i class="fas fa-clock"></i>
-                    <h3>Total Study Hours</h3>
-                    <p id="total-study-hours">0</p>
-                </div>
-                <div class="overview-card">
-                    <i class="fas fa-percentage"></i>
-                    <h3>Completion Rate</h3>
-                    <p id="completion-rate">0%</p>
-                </div>
-                <div class="overview-card">
-                    <i class="fas fa-fire"></i>
-                    <h3>Study Streak</h3>
-                    <p id="study-streak">0 days</p>
-                </div>
-                <div class="overview-card">
-                    <i class="fas fa-calendar-check"></i>
-                    <h3>Active Sessions</h3>
-                    <p id="active-sessions">0</p>
-                </div>
-            </div>
-
-            <!-- Subject-wise Progress -->
-            <div class="subjects-progress">
-                <h3><i class="fas fa-book"></i> Subject-wise Progress</h3>
-                <div id="subjects-grid" class="subjects-grid">
-                    <!-- Subject cards will be populated here -->
-                </div>
             </div>
 
             <!-- Recent Progress Entries -->
@@ -94,21 +66,6 @@
                     <button id="save-remarks">
                         <i class="fas fa-save"></i> Save Remarks
                     </button>
-                </div>
-            </div>
-
-            <!-- Progress Charts -->
-            <div class="charts-section">
-                <h3><i class="fas fa-chart-bar"></i> Progress Analytics</h3>
-                <div class="charts-container">
-                    <div class="chart-card">
-                        <h4>Weekly Study Pattern</h4>
-                        <canvas id="weekly-chart"></canvas>
-                    </div>
-                    <div class="chart-card">
-                        <h4>Subject Performance</h4>
-                        <canvas id="subject-chart"></canvas>
-                    </div>
                 </div>
             </div>
         </div>

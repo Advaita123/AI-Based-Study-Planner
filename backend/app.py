@@ -35,11 +35,27 @@ class SubjectSchedule(db.Model):
     recommended_hours = db.Column(db.Float, nullable=False)
     daily_hours = db.Column(db.Float, nullable=False)
 
+# Add new models for teacher remarks and recent progress
+class TeacherRemarks(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_email = db.Column(db.String(120), nullable=False)
+    teacher_remarks = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class RecentProgress(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_email = db.Column(db.String(120), nullable=False)
+    subject = db.Column(db.String(100), nullable=False)
+    topics = db.Column(db.Text, nullable=False)
+    hours = db.Column(db.Float, nullable=False)
+    confidence = db.Column(db.Integer, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
 # Create database tables
 with app.app_context():
     db.create_all()
 
-# Load ML model with proper error handling
+# Load ML model 
 try:
     # Try multiple possible paths for the model
     model_paths = [
@@ -56,7 +72,7 @@ try:
             break
     
     if ml_model is None:
-        print("Warning: ML model not found. Using fallback predictions.")
+        print("Warning: ML model not found.")
         ml_model = None
 except Exception as e:
     print(f"Error loading ML model: {e}")
@@ -69,7 +85,7 @@ try:
     genai.configure(api_key=GEMINI_API_KEY)
     # Test the API key by making a simple call with the correct model name
     test_model = genai.GenerativeModel('gemini-1.5-flash')
-    test_response = test_model.generate_content("Hello")
+    # test_response = test_model.generate_content("Hello")  # Comment out this line
     print("Gemini API configured successfully")
     model = test_model
 except Exception as e:
@@ -77,7 +93,7 @@ except Exception as e:
     # Try alternative model names
     try:
         test_model = genai.GenerativeModel('gemini-1.5-pro')
-        test_response = test_model.generate_content("Hello")
+        # test_response = test_model.generate_content("Hello")  # Comment out this line
         print("Gemini API configured successfully with gemini-1.5-pro")
         model = test_model
     except Exception as e2:
@@ -206,7 +222,7 @@ def generate_comprehensive_schedule():
         exam_date = data.get('exam_date', '')
         weekday_hours = data.get('weekday_hours', 0)
         weekend_hours = data.get('weekend_hours', 0)
-        user_email = data.get('user_email', '')  # Add user email
+        user_email = data.get('user_email', '')  
         
         if not subjects or not exam_date:
             return jsonify({'error': 'Missing required data'}), 400
@@ -423,6 +439,83 @@ def validate_progress():
         print(f"Error validating progress: {str(e)}")
         return jsonify({'error': 'Error validating progress'}), 500
 
+@app.route('/api/save_teacher_remarks', methods=['POST'])
+def save_teacher_remarks():
+    try:
+        data = request.json
+        student_email = data.get('student_email', '')
+        remarks = data.get('remarks', '')
+        
+        if not student_email:
+            return jsonify({'error': 'Student email required'}), 400
+        
+        # Delete existing remarks for this student
+        existing = TeacherRemarks.query.filter_by(student_email=student_email).first()
+        if existing:
+            db.session.delete(existing)
+        
+        # Save new remarks
+        new_remarks = TeacherRemarks(student_email=student_email, teacher_remarks=remarks)
+        db.session.add(new_remarks)
+        db.session.commit()
+        
+        return jsonify({'message': 'Remarks saved successfully'})
+        
+    except Exception as e:
+        print(f"Error saving teacher remarks: {str(e)}")
+        return jsonify({'error': 'Error saving remarks'}), 500
+
+@app.route('/api/get_teacher_remarks', methods=['POST'])
+def get_teacher_remarks():
+    try:
+        data = request.json
+        student_email = data.get('student_email', '')
+        
+        if not student_email:
+            return jsonify({'error': 'Student email required'}), 400
+        
+        remarks = TeacherRemarks.query.filter_by(student_email=student_email).first()
+        
+        return jsonify({
+            'remarks': remarks.teacher_remarks if remarks else ''
+        })
+        
+    except Exception as e:
+        print(f"Error getting teacher remarks: {str(e)}")
+        return jsonify({'error': 'Error retrieving remarks'}), 500
+
+@app.route('/api/save_recent_progress_for_teacher', methods=['POST'])
+def save_recent_progress_for_teacher():
+    try:
+        data = request.json
+        student_email = data.get('user_email', '')
+        recent_progress = data.get('recent_progress', {})
+        
+        if not student_email or not recent_progress:
+            return jsonify({'error': 'Student email and progress data required'}), 400
+        
+        # Delete existing recent progress for this student
+        existing = RecentProgress.query.filter_by(student_email=student_email).first()
+        if existing:
+            db.session.delete(existing)
+        
+        # Save new recent progress
+        new_progress = RecentProgress(
+            student_email=student_email,
+            subject=recent_progress.get('subject', ''),
+            topics=recent_progress.get('topics', ''),
+            hours=recent_progress.get('hours', 0),
+            confidence=recent_progress.get('confidence', 0)
+        )
+        db.session.add(new_progress)
+        db.session.commit()
+        
+        return jsonify({'message': 'Recent progress saved successfully'})
+        
+    except Exception as e:
+        print(f"Error saving recent progress: {str(e)}")
+        return jsonify({'error': 'Error saving progress'}), 500
+
 @app.route('/api/teacher_progress', methods=['POST'])
 def get_teacher_progress():
     try:
@@ -432,64 +525,27 @@ def get_teacher_progress():
         if not student_email:
             return jsonify({'error': 'Student email required'}), 400
         
-        # In production, this would query your database
-        # For now, return sample progress data
+        # Get teacher remarks
+        teacher_remarks = TeacherRemarks.query.filter_by(student_email=student_email).first()
+        
         progress_data = {
             'student_email': student_email,
             'student_name': student_email.split('@')[0],
-            'total_study_hours': 45.5,
-            'completion_rate': 78,
-            'study_streak': 7,
-            'subjects': [
-                {
-                    'name': 'Mathematics',
-                    'total_hours': 20.5,
-                    'sessions': 8,
-                    'average_confidence': 7.2
-                },
-                {
-                    'name': 'Physics',
-                    'total_hours': 15.0,
-                    'sessions': 6,
-                    'average_confidence': 6.8
-                },
-                {
-                    'name': 'Chemistry',
-                    'total_hours': 10.0,
-                    'sessions': 4,
-                    'average_confidence': 8.1
-                }
-            ],
-            'recent_entries': [
-                {
-                    'date': '2025-01-15',
-                    'subject': 'Mathematics',
-                    'hours': 2.5,
-                    'topics': 'Calculus integration and differentiation',
-                    'confidence': 8
-                },
-                {
-                    'date': '2025-01-14',
-                    'subject': 'Physics',
-                    'hours': 2.0,
-                    'topics': 'Mechanics and Newton\'s laws',
-                    'confidence': 7
-                }
-            ]
+            'recent_entries': [],
+            'teacher_remarks': teacher_remarks.teacher_remarks if teacher_remarks else ''
         }
+        
+        # Get all recent progress entries from Firebase (we'll need to make a request to get this)
+        # For now, we'll return the structure and let the frontend handle Firebase queries
+        # This is a temporary solution - ideally we'd have a proper API to get all Firebase data
         
         return jsonify(progress_data)
         
     except Exception as e:
         print(f"Error getting teacher progress: {str(e)}")
-        return jsonify({'error': 'Error retrieving progress data'}), 500 
-@app.route('/api/stats', methods=['GET'])
-def get_stats():
-    return jsonify({
-        "pending_tasks": 3,
-        "notification_count": 2,
-        "overall_progress": 75
-    })
+        return jsonify({'error': 'Error retrieving progress data'}), 500
+
+
 
 if __name__ == "__main__":
     print(" Starting Flask server on http://127.0.0.1:5000 ...")

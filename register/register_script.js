@@ -28,8 +28,8 @@ document.addEventListener('DOMContentLoaded', function() {
             showMessage('Please enter a valid name (at least 2 characters).');
             return;
         }
-        if (!age || isNaN(age) || age < 10 || age > 100) {
-            showMessage('Please enter a valid age (10-100).');
+        if (!age || isNaN(age) || age < 10 || age > 50) {
+            showMessage('Please enter a valid age (10-50).');
             return;
         }
         if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const userCredential = await auth.createUserWithEmailAndPassword(email, password);
             const user = userCredential.user;
-            // Save user info to Firestore (role=student)
+            
             await db.collection('users').doc(user.uid).set({
                 name: name,
                 age: parseInt(age),

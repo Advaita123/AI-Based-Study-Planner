@@ -148,7 +148,7 @@ function populateSchedule() {
             scheduleItem.className = 'schedule-item';
             
             // Calculate time based on subject order
-            const startHour = 9 + (index * 2); // Start at 9 AM, 2-hour intervals
+            const startHour = 9 + (index * 2); // Start at 9am, 2-hour intervals
             const time = `${startHour}:00 ${startHour >= 12 ? 'PM' : 'AM'}`;
             
             scheduleItem.innerHTML = `

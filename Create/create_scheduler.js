@@ -38,56 +38,6 @@ function removeSubject(button) {
     subjectEntry.remove();
 }
 
-// Handle number of subjects input
-document.getElementById('num-subjects').addEventListener('change', function(e) {
-    const numSubjects = parseInt(e.target.value);
-    const subjectsList = document.getElementById('subjects-list');
-    subjectsList.innerHTML = ''; // Clear existing subjects
-
-    // Create new subject entries
-    for (let i = 0; i < numSubjects; i++) {
-        subjectsList.appendChild(createSubjectEntry(i));
-    }
-});
-
-// Function to generate study plan (placeholder for AI model integration)
-function generateStudyPlan(formData) {
-    
-    const today = new Date();
-    const examDate = new Date(formData.examDate);
-    const totalDays = Math.ceil((examDate - today) / (1000 * 60 * 60 * 24));
-    
-    const studyPlan = {
-        daily_schedule: [],
-        total_days: totalDays,
-        subjects: formData.subjects
-    };
-
-    // Generate daily schedule
-    for (let i = 0; i < totalDays; i++) {
-        const currentDate = new Date(today);
-        currentDate.setDate(today.getDate() + i);
-        
-        const daySchedule = {
-            date: currentDate.toISOString().split('T')[0],
-            subjects: []
-        };
-
-        // Distribute subjects across the day
-        formData.subjects.forEach(subject => {
-            daySchedule.subjects.push({
-                name: subject.name,
-                hours: subject.hours,
-                date: currentDate.toISOString().split('T')[0]
-            });
-        });
-
-        studyPlan.daily_schedule.push(daySchedule);
-    }
-
-    return studyPlan;
-}
-
 // Function to validate form data
 function validateFormData(data) {
     // Validate number of subjects

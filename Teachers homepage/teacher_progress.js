@@ -1,8 +1,37 @@
+// Firebase configuration for teacher progress tracking
+const firebaseConfig = {
+    apiKey: "AIzaSyDQ2o2ZcWZaH0di-DJV9EkLw-4LomO81_Y",
+    authDomain: "studyscheduler-88ae1.firebaseapp.com",
+    projectId: "studyscheduler-88ae1",
+    storageBucket: "studyscheduler-88ae1.firebasestorage.app",
+    messagingSenderId: "789024560599",
+    appId: "1:789024560599:web:08358b5764ec25f8aca792",
+    measurementId: "G-M7P873NEYF"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+
+
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
     updateDate();
     initializeSearch();
+    checkAuth();
+    initializeSaveRemarks();
 });
+
+// Check authentication
+function checkAuth() {
+    auth.onAuthStateChanged(user => {
+        if (!user) {
+            window.location.href = '../Login/login.html';
+        }
+    });
+}
 
 // Update current date
 function updateDate() {
@@ -35,13 +64,15 @@ function initializeSearch() {
 
 // Search for student progress
 async function searchStudentProgress(studentEmail) {
+    window.currentStudentEmail = studentEmail;
     const searchBtn = document.getElementById('search-student');
     const originalText = searchBtn.innerHTML;
     searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
     searchBtn.disabled = true;
     
     try {
-        const response = await fetch('http://localhost:5000/api/teacher_progress', {
+        // Get teacher remarks from backend
+        const remarksResponse = await fetch('http://localhost:5000/api/get_teacher_remarks', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -51,14 +82,19 @@ async function searchStudentProgress(studentEmail) {
             })
         });
         
-        if (response.ok) {
-            const data = await response.json();
-            displayStudentProgress(data);
-        } else {
-            const errorData = await response.json();
-            showNoResults();
-            showMessage(errorData.error || 'Student not found.', 'error');
+        let teacherRemarks = '';
+        if (remarksResponse.ok) {
+            const remarksData = await remarksResponse.json();
+            teacherRemarks = remarksData.remarks || '';
         }
+        
+        // Get progress data from Firebase
+        const progressData = await getStudentProgressFromFirebase(studentEmail);
+        progressData.teacher_remarks = teacherRemarks;
+        
+        displayStudentProgress(progressData);
+        showMessage(`Progress loaded for ${progressData.student_name}`, 'success');
+        
     } catch (error) {
         console.error('Error searching student:', error);
         showNoResults();
@@ -66,6 +102,56 @@ async function searchStudentProgress(studentEmail) {
     } finally {
         searchBtn.innerHTML = originalText;
         searchBtn.disabled = false;
+    }
+}
+
+// Get student progress from Firebase
+async function getStudentProgressFromFirebase(studentEmail) {
+    try {
+        console.log('Fetching progress for student:', studentEmail);
+        
+        const snap = await db.collection('progress')
+            .where('user_email', '==', studentEmail)
+            .orderBy('timestamp', 'desc')
+            .limit(10) 
+            .get();
+        
+        console.log('Found documents:', snap.size);
+        
+        const recentEntries = [];
+        snap.forEach(doc => {
+            const data = doc.data();
+            // Convert Firestore timestamp to regular date if needed
+            if (data.timestamp && data.timestamp.toDate) {
+                data.timestamp = data.timestamp.toDate();
+            }
+            recentEntries.push({
+                id: doc.id,
+                subject: data.subject,
+                topics: data.topics,
+                hours: data.hours,
+                confidence: data.confidence,
+                difficulty: data.difficulty,
+                notes: data.notes,
+                date: data.timestamp
+            });
+        });
+        
+        console.log('Processed entries:', recentEntries);
+        
+        return {
+            student_email: studentEmail,
+            student_name: studentEmail.split('@')[0],
+            recent_entries: recentEntries
+        };
+        
+    } catch (error) {
+        console.error('Error fetching from Firebase:', error);
+        return {
+            student_email: studentEmail,
+            student_name: studentEmail.split('@')[0],
+            recent_entries: []
+        };
     }
 }
 
@@ -80,61 +166,16 @@ function displayStudentProgress(data) {
     // Update student name
     document.getElementById('student-name-display').textContent = data.student_name;
     
-    // Update overview cards
-    document.getElementById('total-study-hours').textContent = `${data.total_study_hours} hours`;
-    document.getElementById('completion-rate').textContent = `${data.completion_rate}%`;
-    document.getElementById('study-streak').textContent = `${data.study_streak} days`;
-    document.getElementById('active-sessions').textContent = data.subjects.reduce((sum, subject) => sum + subject.sessions, 0);
-    
-    // Display subject-wise progress
-    displaySubjectProgress(data.subjects);
-    
     // Display recent entries
     displayRecentEntries(data.recent_entries);
     
-    // Create charts
-    createProgressCharts(data);
+    // Load existing teacher remarks
+    document.getElementById('teacher-remarks').value = data.teacher_remarks || '';
     
-    // Show success message
-    showMessage(`Progress loaded for ${data.student_name}`, 'success');
-}
-
-// Display subject-wise progress
-function displaySubjectProgress(subjects) {
-    const subjectsGrid = document.getElementById('subjects-grid');
-    subjectsGrid.innerHTML = '';
+    // Initialize save remarks button after progress section is shown
+    initializeSaveRemarks();
     
-    subjects.forEach(subject => {
-        const subjectCard = document.createElement('div');
-        subjectCard.className = 'subject-card';
-        
-        const confidenceColor = getConfidenceColor(subject.average_confidence);
-        
-        subjectCard.innerHTML = `
-            <div class="subject-header">
-                <h4>${subject.name}</h4>
-                <span class="confidence-badge" style="background-color: ${confidenceColor}">
-                    ${subject.average_confidence.toFixed(1)}/10
-                </span>
-            </div>
-            <div class="subject-stats">
-                <div class="stat-item">
-                    <i class="fas fa-clock"></i>
-                    <span>${subject.total_hours} hours</span>
-                </div>
-                <div class="stat-item">
-                    <i class="fas fa-calendar-check"></i>
-                    <span>${subject.sessions} sessions</span>
-                </div>
-                <div class="stat-item">
-                    <i class="fas fa-chart-line"></i>
-                    <span>${(subject.total_hours / subject.sessions).toFixed(1)} avg/session</span>
-                </div>
-            </div>
-        `;
-        
-        subjectsGrid.appendChild(subjectCard);
-    });
+    
 }
 
 // Display recent entries
@@ -143,7 +184,13 @@ function displayRecentEntries(entries) {
     recentEntries.innerHTML = '';
     
     if (entries.length === 0) {
-        recentEntries.innerHTML = '<p class="no-entries">No recent study sessions found.</p>';
+        recentEntries.innerHTML = `
+            <div class="no-entries">
+                <i class="fas fa-info-circle"></i>
+                <p>No recent study sessions found for this student.</p>
+                <p>The student may not have logged any progress yet.</p>
+            </div>
+        `;
         return;
     }
     
@@ -151,10 +198,13 @@ function displayRecentEntries(entries) {
         const entryDiv = document.createElement('div');
         entryDiv.className = 'entry-card';
         
+        const date = new Date(entry.date);
+        const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
         entryDiv.innerHTML = `
             <div class="entry-header">
                 <span class="entry-subject">${entry.subject}</span>
-                <span class="entry-date">${entry.date}</span>
+                <span class="entry-date">${formattedDate}</span>
             </div>
             <div class="entry-details">
                 <div class="detail-item">
@@ -165,103 +215,19 @@ function displayRecentEntries(entries) {
                     <i class="fas fa-thumbs-up"></i>
                     <span>Confidence: ${entry.confidence}/10</span>
                 </div>
+                <div class="detail-item">
+                    <i class="fas fa-star"></i>
+                    <span>Difficulty: ${entry.difficulty || 'Not specified'}</span>
+                </div>
             </div>
             <div class="entry-topics">
-                <strong>Topics:</strong> ${entry.topics}
+                <strong>Topics:</strong> ${entry.topics || 'General study'}
             </div>
+            ${entry.notes ? `<div class="entry-notes"><strong>Notes:</strong> ${entry.notes}</div>` : ''}
         `;
         
         recentEntries.appendChild(entryDiv);
     });
-}
-
-// Create progress charts
-function createProgressCharts(data) {
-    createWeeklyChart(data);
-    createSubjectChart(data.subjects);
-}
-
-// Create weekly study pattern chart
-function createWeeklyChart(data) {
-    const ctx = document.getElementById('weekly-chart').getContext('2d');
-    
-    // Sample weekly data (in production, this would come from the backend)
-    const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const studyHours = [3.5, 4.2, 2.8, 5.1, 3.9, 6.2, 4.8];
-    
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: weekDays,
-            datasets: [{
-                label: 'Study Hours',
-                data: studyHours,
-                borderColor: '#5b95cf',
-                backgroundColor: 'rgba(91, 149, 207, 0.1)',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                }
-            }
-        }
-    });
-}
-
-// Create subject performance chart
-function createSubjectChart(subjects) {
-    const ctx = document.getElementById('subject-chart').getContext('2d');
-    
-    const subjectNames = subjects.map(s => s.name);
-    const studyHours = subjects.map(s => s.total_hours);
-    
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: subjectNames,
-            datasets: [{
-                data: studyHours,
-                backgroundColor: [
-                    '#5b95cf',
-                    '#28a745',
-                    '#ffc107',
-                    '#dc3545',
-                    '#6f42c1'
-                ],
-                borderWidth: 2,
-                borderColor: '#ffffff'
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            }
-        }
-    });
-}
-
-// Get confidence color based on level
-function getConfidenceColor(confidence) {
-    if (confidence >= 8) return '#28a745'; // Green
-    if (confidence >= 6) return '#ffc107'; // Yellow
-    return '#dc3545'; // Red
 }
 
 // Show no results message
@@ -285,12 +251,55 @@ function showMessage(message, type = 'info') {
 }
 
 // Handle teacher remarks
-document.getElementById('save-remarks').addEventListener('click', function() {
-    const remarks = document.getElementById('teacher-remarks').value.trim();
-    if (remarks) {
-        // In production, save remarks to database
-        showMessage('Remarks saved successfully!', 'success');
+function initializeSaveRemarks() {
+    const saveButton = document.getElementById('save-remarks');
+    if (saveButton) {
+        // Remove existing event listener if any
+        saveButton.removeEventListener('click', handleSaveRemarks);
+        // Add new event listener
+        saveButton.addEventListener('click', handleSaveRemarks);
+        console.log('Save remarks button event listener initialized');
     } else {
-        showMessage('Please enter some remarks before saving.', 'error');
+        console.error('Save remarks button not found');
     }
-}); 
+}
+
+async function handleSaveRemarks() {
+    console.log('Save remarks button clicked');
+    const remarks = document.getElementById('teacher-remarks').value.trim();
+    console.log('Remarks text:', remarks);
+    console.log('Current student email:', window.currentStudentEmail);
+    
+    if (remarks && window.currentStudentEmail) {
+        try {
+            console.log('Sending remarks to backend...');
+            const response = await fetch('http://localhost:5000/api/save_teacher_remarks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    student_email: window.currentStudentEmail, 
+                    remarks: remarks 
+                })
+            });
+            
+            console.log('Response status:', response.status);
+            const responseData = await response.json();
+            console.log('Response data:', responseData);
+            
+            if (response.ok) {
+                showMessage('Remarks saved successfully!', 'success');
+            } else {
+                showMessage('Failed to save remarks: ' + (responseData.error || 'Unknown error'), 'error');
+            }
+        } catch (error) {
+            console.error('Error saving remarks:', error);
+            showMessage('Error saving remarks: ' + error.message, 'error');
+        }
+    } else {
+        if (!remarks) {
+            showMessage('Please enter some remarks before saving.', 'error');
+        } else if (!window.currentStudentEmail) {
+            showMessage('No student selected. Please search for a student first.', 'error');
+        }
+    }
+} 

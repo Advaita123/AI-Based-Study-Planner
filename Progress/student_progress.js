@@ -1,417 +1,382 @@
-// Firebase configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyDQ2o2ZcWZaH0di-DJV9EkLw-4LomO81_Y",
-    authDomain: "studyscheduler-88ae1.firebaseapp.com",
-    projectId: "studyscheduler-88ae1",
-    storageBucket: "studyscheduler-88ae1.firebasestorage.app",
-    messagingSenderId: "789024560599",
-    appId: "1:789024560599:web:08358b5764ec25f8aca792",
-    measurementId: "G-M7P873NEYF"
-};
-
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-// Global variables
 let currentUser = null;
 let userSchedule = null;
 let progressData = [];
 
-// Initialize the page
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async () => {
     checkAuth();
-    initializeConfidenceSlider();
-    loadUserSchedule();
-    loadProgressHistory();
+    
+    // Add form submission handler
+    const progressForm = document.getElementById('progress-form');
+    if (progressForm) {
+        progressForm.addEventListener('submit', handleProgressSubmission);
+    }
 });
 
-// Check authentication
 function checkAuth() {
-    auth.onAuthStateChanged(function(user) {
+    auth.onAuthStateChanged(async user => {
         if (user) {
             currentUser = user;
-            console.log('User authenticated:', user.email);
+            console.log('Logged in as:', user.email);
+            await loadUserSchedule();
+            await loadAllLogsAndUpdateUI();
+            await fetchTeacherRemarks(); // Fetch teacher remarks after authentication
         } else {
-            // Redirect to login if not authenticated
             window.location.href = '../Login/login.html';
         }
     });
 }
 
-// Initialize confidence slider
-function initializeConfidenceSlider() {
-    const slider = document.getElementById('confidence-level');
-    const value = document.getElementById('confidence-value');
-    
-    slider.addEventListener('input', function() {
-        value.textContent = this.value;
-    });
-}
-
-// Load user's schedule from backend
 async function loadUserSchedule() {
     try {
         const response = await fetch('http://localhost:5000/api/user_schedule', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                user_email: currentUser.email
-            })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ user_email: currentUser.email })
         });
-        
-        if (response.ok) {
-            const data = await response.json();
-            userSchedule = data.schedule;
-            populateSubjectSelect();
-            updateTodayGoal();
-        } else {
-            console.log('No schedule found for user');
-            // Use default subjects if no schedule exists
-            userSchedule = {
-                subjects: [
-                    { name: 'Mathematics', difficulty: 'Medium' },
-                    { name: 'Physics', difficulty: 'Hard' },
-                    { name: 'Chemistry', difficulty: 'Easy' },
-                    { name: 'Biology', difficulty: 'Medium' }
-                ]
-            };
-            populateSubjectSelect();
+        const data = await response.json();
+        userSchedule = data.schedule || {};
+        if (!userSchedule.subjects || userSchedule.subjects.length === 0) {
+            console.log('No subjects in user schedule');
+            userSchedule.subjects = defaultSubjects();
         }
-    } catch (error) {
-        console.error('Error loading schedule:', error);
-        // Fallback to default subjects
-        userSchedule = {
-            subjects: [
-                { name: 'Mathematics', difficulty: 'Medium' },
-                { name: 'Physics', difficulty: 'Hard' },
-                { name: 'Chemistry', difficulty: 'Easy' },
-                { name: 'Biology', difficulty: 'Medium' }
-            ]
-        };
-        populateSubjectSelect();
+    } catch (err) {
+        console.error('Error fetching user schedule:', err);
+        userSchedule = { subjects: defaultSubjects() };
     }
+    populateSubjectSelect();
 }
 
-// Populate subject select dropdown
+function defaultSubjects() {
+    return [
+        { name: 'Mathematics', difficulty: 'Medium' },
+        { name: 'Physics', difficulty: 'Hard' },
+        { name: 'Chemistry', difficulty: 'Easy' },
+        { name: 'Biology', difficulty: 'Medium' }
+    ];
+}
+
 function populateSubjectSelect() {
-    const select = document.getElementById('subject-select');
-    select.innerHTML = '<option value="">Select Subject</option>';
-    
-    if (userSchedule && userSchedule.subjects) {
-        userSchedule.subjects.forEach(subject => {
-            const option = document.createElement('option');
-            option.value = subject.name;
-            option.textContent = subject.name;
-            select.appendChild(option);
-        });
-    }
+    const container = document.getElementById('subject-progress-list');
+    container.innerHTML = '';
+    userSchedule.subjects.forEach(subj => {
+        const row = document.createElement('div');
+        row.className = 'subject-progress-row';
+        row.innerHTML = `
+            <input type="checkbox" name="subjects" value="${subj.name}">
+            <label>${subj.name}</label>
+            <input type="text" class="subject-topics" placeholder="Topics">
+            <input type="range" class="subject-confidence" min="1" max="10" value="5">
+            <span class="conf-value">5</span>
+        `;
+        // Update confidence value display
+        const slider = row.querySelector('.subject-confidence');
+        const confValue = row.querySelector('.conf-value');
+        slider.addEventListener('input', () => { confValue.textContent = slider.value; });
+        container.appendChild(row);
+    });
 }
 
-// Update today's goal
-function updateTodayGoal() {
-    const todayGoal = document.getElementById('today-goal');
-    if (userSchedule && userSchedule.subjects) {
-        const totalHours = userSchedule.subjects.reduce((sum, subject) => {
-            return sum + (subject.daily_hours || 2);
-        }, 0);
-        todayGoal.textContent = `${totalHours.toFixed(1)} hours`;
-    } else {
-        todayGoal.textContent = '4.0 hours';
-    }
-}
-
-// Load progress history
-async function loadProgressHistory() {
+async function loadAllLogsAndUpdateUI() {
     try {
-        const progressRef = db.collection('progress').where('user_email', '==', currentUser.email);
-        const snapshot = await progressRef.orderBy('timestamp', 'desc').limit(10).get();
+        console.log('Loading logs for user:', currentUser.email);
         
-        progressData = [];
-        snapshot.forEach(doc => {
-            progressData.push({ id: doc.id, ...doc.data() });
+        const snap = await db.collection('progress')
+            .where('user_email', '==', currentUser.email)
+            .orderBy('timestamp', 'desc').get();
+        
+        console.log('Found documents:', snap.size);
+        
+        const allLogs = [];
+        snap.forEach(doc => {
+            const data = doc.data();
+            // Convert Firestore timestamp to regular date if needed
+            if (data.timestamp && data.timestamp.toDate) {
+                data.timestamp = data.timestamp.toDate();
+            }
+            allLogs.push({ id: doc.id, ...data });
         });
         
-        displayProgressHistory();
-        updateProgressStats();
-        createCharts();
-    } catch (error) {
-        console.error('Error loading progress:', error);
+        console.log('Processed logs:', allLogs.length);
+        console.log('Logs data:', allLogs);
+        
+        // Show recent log for all subjects
+        showRecentLogForAllSubjects(allLogs);
+        // Update subject performance chart
+        updateSubjectChartWithAllLogs(allLogs);
+        // Update progress history
+        updateProgressHistory(allLogs);
+    } catch (err) {
+        console.error('Error loading logs:', err);
+        document.getElementById('recent-log').innerHTML = '<p style="color:red;">Error loading recent log.</p>';
+        updateSubjectChartWithAllLogs([]);
+        updateProgressHistory([]);
     }
 }
 
-// Display progress history
-function displayProgressHistory() {
-    const historyContainer = document.getElementById('progress-history');
-    historyContainer.innerHTML = '';
+function showRecentLogForAllSubjects(allLogs) {
+    console.log('Showing recent logs for subjects. All logs:', allLogs);
+    console.log('User schedule subjects:', userSchedule?.subjects);
     
-    if (progressData.length === 0) {
-        historyContainer.innerHTML = '<p style="text-align: center; color: #6c757d;">No progress entries yet. Start logging your study sessions!</p>';
+    const container = document.getElementById('recent-log');
+    container.innerHTML = '';
+    if (!userSchedule || !userSchedule.subjects) {
+        console.log('No user schedule or subjects found');
         return;
     }
     
-    progressData.forEach(entry => {
-        const entryDiv = document.createElement('div');
-        entryDiv.className = 'progress-entry';
+    userSchedule.subjects.forEach(subj => {
+        console.log('Processing subject:', subj.name);
+        // Find the most recent log for this subject
+        const log = allLogs.find(l => l.subject === subj.name);
+        console.log('Found log for subject:', subj.name, log);
         
-        const date = new Date(entry.timestamp.toDate()).toLocaleDateString();
-        const time = new Date(entry.timestamp.toDate()).toLocaleTimeString();
-        
-        entryDiv.innerHTML = `
-            <div class="entry-header">
-                <span class="entry-subject">${entry.subject}</span>
-                <span class="entry-date">${date} at ${time}</span>
-            </div>
-            <div class="entry-details">
-                <div class="detail-item">
-                    <i class="fas fa-clock"></i>
-                    <span>${entry.hours} hours</span>
+        if (log) {
+            const date = log.timestamp && log.timestamp.toDate ? log.timestamp.toDate() : new Date(log.timestamp);
+            container.innerHTML += `
+                <div class="recent-log-entry" style="border:1px solid #eee; border-radius:6px; padding:0.5em 1em; margin-bottom:0.5em;">
+                    <strong>${log.subject}</strong> <span style="color:#888; font-size:0.9em;">(${date.toLocaleDateString()} ${date.toLocaleTimeString()})</span><br>
+                    <span><b>Topics:</b> ${log.topics}</span><br>
+                    <span><b>Confidence:</b> ${log.confidence}/10</span><br>
+                    <span><b>Hours:</b> ${log.hours}</span>
                 </div>
-                <div class="detail-item">
-                    <i class="fas fa-star"></i>
-                    <span>Difficulty: ${entry.difficulty}</span>
-                </div>
-                <div class="detail-item">
-                    <i class="fas fa-thumbs-up"></i>
-                    <span>Confidence: ${entry.confidence}/10</span>
-                </div>
-            </div>
-            <div class="entry-topics">
-                <h4>Topics Covered:</h4>
-                <p>${entry.topics}</p>
-            </div>
-            ${entry.notes ? `<div class="entry-topics"><h4>Notes:</h4><p>${entry.notes}</p></div>` : ''}
-        `;
-        
-        historyContainer.appendChild(entryDiv);
-    });
-}
-
-// Update progress statistics
-function updateProgressStats() {
-    const totalStudyTime = progressData.reduce((sum, entry) => sum + entry.hours, 0);
-    const completionRate = calculateCompletionRate();
-    const studyStreak = calculateStudyStreak();
-    
-    document.getElementById('total-study-time').textContent = `${totalStudyTime.toFixed(1)} hours`;
-    document.getElementById('completion-rate').textContent = `${completionRate}%`;
-    document.getElementById('study-streak').textContent = `${studyStreak} days`;
-}
-
-// Calculate completion rate
-function calculateCompletionRate() {
-    if (!userSchedule || !userSchedule.subjects) return 0;
-    
-    const totalRecommended = userSchedule.subjects.reduce((sum, subject) => {
-        return sum + (subject.recommended_hours || 0);
-    }, 0);
-    
-    const totalCompleted = progressData.reduce((sum, entry) => sum + entry.hours, 0);
-    
-    return totalRecommended > 0 ? Math.min(100, Math.round((totalCompleted / totalRecommended) * 100)) : 0;
-}
-
-// Calculate study streak
-function calculateStudyStreak() {
-    if (progressData.length === 0) return 0;
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    let streak = 0;
-    let currentDate = new Date(today);
-    
-    while (true) {
-        const hasEntry = progressData.some(entry => {
-            const entryDate = new Date(entry.timestamp.toDate());
-            entryDate.setHours(0, 0, 0, 0);
-            return entryDate.getTime() === currentDate.getTime();
-        });
-        
-        if (hasEntry) {
-            streak++;
-            currentDate.setDate(currentDate.getDate() - 1);
+            `;
         } else {
-            break;
-        }
-    }
-    
-    return streak;
-}
-
-// Create charts
-function createCharts() {
-    createWeeklyChart();
-    createSubjectChart();
-}
-
-// Create weekly study hours chart
-function createWeeklyChart() {
-    const ctx = document.getElementById('weekly-chart').getContext('2d');
-    
-    const last7Days = [];
-    const studyHours = [];
-    
-    for (let i = 6; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        date.setHours(0, 0, 0, 0);
-        
-        last7Days.push(date.toLocaleDateString('en-US', { weekday: 'short' }));
-        
-        const dayHours = progressData.filter(entry => {
-            const entryDate = new Date(entry.timestamp.toDate());
-            entryDate.setHours(0, 0, 0, 0);
-            return entryDate.getTime() === date.getTime();
-        }).reduce((sum, entry) => sum + entry.hours, 0);
-        
-        studyHours.push(dayHours);
-    }
-    
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: last7Days,
-            datasets: [{
-                label: 'Study Hours',
-                data: studyHours,
-                backgroundColor: '#5b95cf',
-                borderColor: '#4a7caf',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1
-                    }
-                }
-            }
+            container.innerHTML += `
+                <div class="recent-log-entry" style="border:1px solid #eee; border-radius:6px; padding:0.5em 1em; margin-bottom:0.5em;">
+                    <strong>${subj.name}</strong> <span style="color:#888; font-size:0.9em;">No recent log</span>
+                </div>
+            `;
         }
     });
 }
 
-// Create subject performance chart
-function createSubjectChart() {
+function updateSubjectChartWithAllLogs(allLogs) {
     const ctx = document.getElementById('subject-chart').getContext('2d');
-    
-    const subjectStats = {};
-    
-    progressData.forEach(entry => {
-        if (!subjectStats[entry.subject]) {
-            subjectStats[entry.subject] = { hours: 0, count: 0 };
-        }
-        subjectStats[entry.subject].hours += entry.hours;
-        subjectStats[entry.subject].count += 1;
+    const allSubjects = userSchedule && userSchedule.subjects ? userSchedule.subjects.map(s => s.name) : [];
+    const subjectMap = {};
+    allSubjects.forEach(name => subjectMap[name] = 0);
+    allLogs.forEach(e => {
+        if (subjectMap.hasOwnProperty(e.subject)) subjectMap[e.subject] += e.hours || 0;
     });
-    
-    const subjects = Object.keys(subjectStats);
-    const hours = subjects.map(subject => subjectStats[subject].hours);
-    
-    new Chart(ctx, {
+    const subjectNames = Object.keys(subjectMap);
+    const studyHours = Object.values(subjectMap);
+    if (window.subjectChartInstance) window.subjectChartInstance.destroy();
+    window.subjectChartInstance = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: subjects,
+            labels: subjectNames,
             datasets: [{
-                data: hours,
+                data: studyHours,
                 backgroundColor: [
-                    '#5b95cf',
-                    '#28a745',
-                    '#ffc107',
-                    '#dc3545',
-                    '#6f42c1'
-                ]
+                    '#5b95cf', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#17a2b8', '#fd7e14', '#6610f2', '#20c997'
+                ],
+                borderWidth: 2,
+                borderColor: '#ffffff'
             }]
         },
         options: {
-            responsive: true,
+            responsive: false,
             plugins: {
-                legend: {
-                    position: 'bottom'
-                }
+                legend: { position: 'bottom' }
             }
         }
     });
 }
 
-// Handle form submission
-document.getElementById('progress-form').addEventListener('submit', async function(event) {
-    event.preventDefault();
+async function sendRecentProgressToTeacher() {
+    try {
+        const snap = await db.collection('progress')
+            .where('user_email', '==', currentUser.email)
+            .orderBy('timestamp', 'desc').limit(1).get();
+        const recent = [];
+        snap.forEach(doc => {
+            const data = doc.data();
+            // Convert Firestore timestamp to regular date if needed
+            if (data.timestamp && data.timestamp.toDate) {
+                data.timestamp = data.timestamp.toDate();
+            }
+            recent.push({ id: doc.id, ...data });
+        });
+        if (recent.length > 0) {
+            await fetch('http://localhost:5000/api/save_recent_progress_for_teacher', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_email: currentUser.email, recent_progress: recent[0] })
+            });
+        }
+    } catch (err) { 
+        console.error('Error sending recent progress to teacher:', err);
+    }
+}
+
+async function fetchTeacherRemarks() {
+    try {
+        console.log('Fetching teacher remarks for user:', currentUser.email);
+        
+        const res = await fetch('http://localhost:5000/api/get_teacher_remarks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ student_email: currentUser.email })
+        });
+        
+        console.log('Teacher remarks response status:', res.status);
+        const data = await res.json();
+        console.log('Teacher remarks response data:', data);
+        
+        const remarksElement = document.getElementById('teacher-remarks-display');
+        if (remarksElement) {
+            const remarksText = data.remarks && data.remarks.trim() ? data.remarks : 'No remarks yet.';
+            remarksElement.textContent = remarksText;
+            console.log('Updated teacher remarks display with:', remarksText);
+        } else {
+            console.error('Teacher remarks display element not found');
+        }
+    } catch (err) {
+        console.error('Error fetching teacher remarks:', err);
+        const remarksElement = document.getElementById('teacher-remarks-display');
+        if (remarksElement) {
+            remarksElement.textContent = 'No remarks yet.';
+        }
+    }
+}
+
+async function handleProgressSubmission(e) {
+    e.preventDefault();
     
-    const submitBtn = event.target.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-    submitBtn.disabled = true;
+    if (!currentUser) {
+        alert('Please log in to save progress');
+        return;
+    }
     
     try {
-        const formData = {
-            subject: document.getElementById('subject-select').value,
-            hours: parseFloat(document.getElementById('study-hours').value),
-            topics: document.getElementById('study-topics').value,
-            difficulty: document.querySelector('input[name="difficulty"]:checked').value,
-            confidence: parseInt(document.getElementById('confidence-level').value),
-            notes: document.getElementById('notes').value,
-            user_email: currentUser.email,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        };
+        console.log('Starting progress submission...');
         
-        // Validate data
-        if (!validateProgressData(formData)) {
-            throw new Error('Please fill in all required fields correctly.');
+        // Get selected subjects
+        const selectedSubjects = [];
+        const subjectRows = document.querySelectorAll('.subject-progress-row');
+        console.log('Found subject rows:', subjectRows.length);
+        
+        subjectRows.forEach(row => {
+            const checkbox = row.querySelector('input[type="checkbox"]');
+            const topicsInput = row.querySelector('.subject-topics');
+            const confidenceSlider = row.querySelector('.subject-confidence');
+            
+            if (checkbox && checkbox.checked) {
+                selectedSubjects.push({
+                    name: checkbox.value,
+                    topics: topicsInput ? topicsInput.value.trim() : '',
+                    confidence: confidenceSlider ? parseInt(confidenceSlider.value) : 5
+                });
+            }
+        });
+        
+        console.log('Selected subjects:', selectedSubjects);
+        
+        if (selectedSubjects.length === 0) {
+            alert('Please select at least one subject');
+            return;
         }
         
-        // Save to Firebase
-        await db.collection('progress').add(formData);
+        // Get other form data
+        const studyHours = parseFloat(document.getElementById('study-hours').value);
+        const difficulty = document.querySelector('input[name="difficulty"]:checked')?.value;
+        const notes = document.getElementById('notes').value.trim();
         
-        // Show success message
-        showMessage('Progress logged successfully!', 'success');
+        console.log('Form data:', { studyHours, difficulty, notes });
+        
+        if (!studyHours || !difficulty) {
+            alert('Please fill in all required fields');
+            return;
+        }
+        
+        // Calculate hours per subject
+        const hoursPerSubject = Math.round(studyHours / selectedSubjects.length,2);
+        
+        // Save progress for each selected subject
+        for (const subject of selectedSubjects) {
+            const progressData = {
+                user_email: currentUser.email,
+                subject: subject.name,
+                topics: subject.topics || 'General study',
+                hours: hoursPerSubject,
+                confidence: subject.confidence,
+                difficulty: difficulty,
+                notes: notes,
+                timestamp: new Date()
+            };
+            
+            console.log('Saving progress data:', progressData);
+            
+            // Save to Firebase
+            const docRef = await db.collection('progress').add(progressData);
+            console.log('Progress saved with ID:', docRef.id);
+        }
         
         // Reset form
-        event.target.reset();
-        document.getElementById('confidence-value').textContent = '5';
+        e.target.reset();
+        document.querySelectorAll('.subject-progress-row input[type="checkbox"]').forEach(cb => cb.checked = false);
+        document.querySelectorAll('.subject-topics').forEach(input => input.value = '');
+        document.querySelectorAll('.subject-confidence').forEach(slider => {
+            slider.value = 5;
+            slider.nextElementSibling.textContent = '5';
+        });
         
-        // Reload data
-        await loadProgressHistory();
+        // Reload logs and update UI
+        console.log('Reloading logs and updating UI...');
+        await loadAllLogsAndUpdateUI();
+        await sendRecentProgressToTeacher();
+        
+        alert('Progress logged successfully!');
         
     } catch (error) {
         console.error('Error saving progress:', error);
-        showMessage(error.message, 'error');
-    } finally {
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
+        alert('Error saving progress. Please try again.');
     }
-});
-
-// Validate progress data
-function validateProgressData(data) {
-    if (!data.subject || data.hours <= 0 || !data.topics.trim()) {
-        return false;
-    }
-    
-    if (data.hours > 12) {
-        showMessage('Study hours cannot exceed 12 hours per session.', 'error');
-        return false;
-    }
-    
-    return true;
 }
 
-// Show message
-function showMessage(message, type = 'error') {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${type}`;
-    messageDiv.textContent = message;
+function updateProgressHistory(allLogs) {
+    const container = document.getElementById('progress-history');
+    if (!container) return;
     
-    const container = document.querySelector('.container');
-    container.insertBefore(messageDiv, container.firstChild);
+    container.innerHTML = '';
     
-    setTimeout(() => {
-        messageDiv.remove();
-    }, 5000);
-} 
+    if (allLogs.length === 0) {
+        container.innerHTML = '<p style="color:#666; text-align:center;">No progress logs yet. Start studying to see your history!</p>';
+        return;
+    }
+    
+    // Show last 10 logs
+    const recentLogs = allLogs.slice(0, 10);
+    
+    recentLogs.forEach(log => {
+        const date = log.timestamp && log.timestamp.toDate ? log.timestamp.toDate() : new Date(log.timestamp);
+        const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        const logEntry = document.createElement('div');
+        logEntry.className = 'history-entry';
+        logEntry.style.cssText = `
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        `;
+        
+        logEntry.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <strong style="color: #2c3e50; font-size: 1.1em;">${log.subject}</strong>
+                <span style="color: #7f8c8d; font-size: 0.9em;">${formattedDate}</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 8px;">
+                <div><strong>Hours:</strong> ${log.hours}</div>
+                <div><strong>Confidence:</strong> ${log.confidence}/10</div>
+                <div><strong>Difficulty:</strong> ${log.difficulty}</div>
+            </div>
+            ${log.topics ? `<div style="margin-bottom: 8px;"><strong>Topics:</strong> ${log.topics}</div>` : ''}
+            ${log.notes ? `<div style="color: #666; font-style: italic;"><strong>Notes:</strong> ${log.notes}</div>` : ''}
+        `;
+        
+        container.appendChild(logEntry);
+    });
+}
