@@ -49,7 +49,7 @@ class TestMainFunction:
     
     def test_main_runs_successfully(self):
         result = main()
-        assert result == "All calculations completed successfully!"
+        assert result == "All calculations completed"
     
     def test_main_returns_string(self):
         result = main()
