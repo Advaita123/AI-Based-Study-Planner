@@ -1,11 +1,3 @@
-def calculate(operation, a, b):
-  operations={
-    'add':add,
-    'subtract':subract,
-    'multiply':multiply,
-    'divide':divide
-    }
-
 def add(a,b):
   return a+b
   
@@ -20,8 +12,18 @@ def divide(a,b):
    raise ValueError("Cannot divide by zero")
   return a/b
 
-if operation not in operations:
-  raise ValueError(f"{operation} not possible")
+def calculate(operation, a, b):
+    operations = {
+        'add': add,
+        'subtract': subtract,
+        'multiply': multiply,
+        'divide': divide
+    }
+
+    if operation not in operations:
+        raise ValueError(f"{operation} not possible")
+
+    return operations[operation](a, b)
 def main():
   print(f"2+2={calculate(add,2,2)}")
   print(f"5-2={calculate(subtract,5,2)}")
