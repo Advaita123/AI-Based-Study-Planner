@@ -1,0 +1,45 @@
+name: Run calculator test
+
+on:
+  push:
+    paths:
+      - "Databricks/MLflow/main_calc.py"
+      - ".github/workflows/calc.yml"
+  workflow_dispatch:
+
+jobs:
+  test:    
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest>=7.4.0 pytest-cov>=4.1.0
+      
+      - name: Run tests with pytest
+        run: |
+          pytest Databricks/MLflow/testcalc.py -v
+      
+      - name: Test main script execution
+        run: |
+          python Databricks/MLflow/main_calc.py
+      
+      - name: Display success message
+        if: success()
+        run: |
+          echo " All tests passed successfully"
+          echo " Main functions executed successfully"
+      
+      - name: Display failure message
+        if: failure()
+        run: |
+          echo " Tests failed! Check logs above for details"
