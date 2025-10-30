@@ -3,7 +3,7 @@ name: Run calculator test
 on:
   push:
     paths:
-      - "Databricks/MLflow/main_calc.py"
+      - "main_calc.py"
       - ".github/workflows/calc.yml"
   workflow_dispatch:
 
@@ -27,11 +27,11 @@ jobs:
       
       - name: Run tests with pytest
         run: |
-          pytest Databricks/MLflow/testcalc.py -v
+          pytest testcalc.py -v
       
       - name: Test main script execution
         run: |
-          python Databricks/MLflow/main_calc.py
+          python main_calc.py
       
       - name: Display success message
         if: success()
