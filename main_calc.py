@@ -3,7 +3,7 @@ def calculate(operation, a, b):
     'add':add,
     'subtract':subract,
     'multiply':multiply,
-    'divide':'divide
+    'divide':divide
     }
 
 def add(a,b):
