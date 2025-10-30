@@ -2,7 +2,7 @@ def calculate(operation, a, b):
   operations={
     'add':add,
     'subtract':subract,
-    'multiply':'multiply,
+    'multiply':multiply,
     'divide':'divide
     }
 
